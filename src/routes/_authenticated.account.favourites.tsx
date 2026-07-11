@@ -21,13 +21,4 @@ function FavProducts() {
       <h2 className="font-display text-lg font-bold uppercase tracking-tight">Favourite products</h2>
       {items.length === 0 ? (
         <p className="mt-4 text-sm text-muted-foreground">
-          Tap the heart on a product card to save it here.
-        </p>
-      ) : (
-        <div className="mt-6 grid gap-6 sm:grid-cols-2">
-          {items.map((p) => p && <ProductCard key={p.id} product={p} />)}
-        </div>
-      )}
-    </div>
-  );
-}
+          Tap the heart on a product card to sav

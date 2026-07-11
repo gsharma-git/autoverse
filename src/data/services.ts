@@ -1,112 +1,108 @@
 import type { Service } from "./types";
 
+// Static fallback list — the DB is the source of truth.
+// This is used only if the Supabase fetch fails or during local dev without a DB.
 export const services: Service[] = [
   {
-    id: "wheel-alignment",
-    slug: "wheel-alignment",
-    name: "Wheel Alignment",
+    id: "new-alloys",
+    slug: "new-alloys",
+    name: "New Alloys & Tyres",
     description:
-      "Precision 4-wheel alignment using laser-guided rigs. Extends tyre life and corrects steering pull for a straight, planted drive.",
-    applicableVehicles: ["Hatchback", "Sedan", "SUV", "Luxury"],
-    icon: "target",
-    priceFromText: "From ₹499",
-  },
-  {
-    id: "wheel-balancing",
-    slug: "wheel-balancing",
-    name: "Wheel Balancing",
-    description:
-      "Dynamic on-car balancing eliminates vibration at highway speeds. Recommended every 5,000 km or after new tyre fitment.",
+      "Browse and enquire on the widest range of new alloy wheels and tyres — car, bike, and tractor fitments available.",
     applicableVehicles: ["All"],
-    icon: "circle-dot",
-    priceFromText: "From ₹299",
+    icon: "circle",
+    priceFromText: "Quoted per fitment",
   },
   {
-    id: "puncture-repair",
-    slug: "puncture-repair",
-    name: "Tyre Puncture Repair",
+    id: "alloyment-balancing",
+    slug: "alloyment-balancing",
+    name: "Alloyment & Balancing",
     description:
-      "Mushroom-plug patch repair from inside the tyre — safer and longer-lasting than surface plugs. Done in under 20 minutes.",
-    applicableVehicles: ["All"],
-    icon: "wrench",
-    priceFromText: "From ₹149",
-  },
-  {
-    id: "pressure-check",
-    slug: "pressure-check",
-    name: "Tyre Pressure Check",
-    description:
-      "Free digital pressure check and top-up across all 4 tyres and the spare. Critical for fuel efficiency and safety.",
-    applicableVehicles: ["All"],
-    icon: "gauge",
-    priceFromText: "Free with any service",
-  },
-  {
-    id: "nitrogen-filling",
-    slug: "nitrogen-filling",
-    name: "Nitrogen Air Filling",
-    description:
-      "Nitrogen retains pressure longer and runs cooler than regular air. Ideal for highway drivers and performance tyres.",
-    applicableVehicles: ["All"],
-    icon: "wind",
-    priceFromText: "From ₹99",
-  },
-  {
-    id: "tyre-rotation",
-    slug: "tyre-rotation",
-    name: "Tyre Rotation",
-    description:
-      "Rotate front-to-rear following manufacturer pattern to equalise wear. Recommended every 8,000–10,000 km.",
-    applicableVehicles: ["All"],
-    icon: "refresh-cw",
-    priceFromText: "From ₹399",
-  },
-  {
-    id: "tyre-installation",
-    slug: "tyre-installation",
-    name: "Tyre Installation",
-    description:
-      "Full mount, balance and valve replacement on your new tyres with disposal of the old set included.",
-    applicableVehicles: ["All"],
-    icon: "package-plus",
-    priceFromText: "From ₹250/tyre",
-  },
-  {
-    id: "alloy-installation",
-    slug: "alloy-installation",
-    name: "Alloy Wheel Installation",
-    description:
-      "Precise torque-spec mounting for new alloy sets, hub-centric fitment check and balance included.",
+      "Precise hub-centric alloy fitment plus dynamic on-car balancing. Eliminates vibration and protects your new rims.",
     applicableVehicles: ["All"],
     icon: "settings",
     priceFromText: "From ₹500/wheel",
   },
   {
-    id: "wheel-cleaning",
-    slug: "wheel-cleaning",
-    name: "Wheel Cleaning",
+    id: "tyre-service",
+    slug: "tyre-service",
+    name: "Tyre Service",
     description:
-      "Detailer-grade cleaning that lifts brake dust and road grime from every spoke without damaging the finish.",
+      "Full-service tyre care: rotation, pressure check, puncture repair, replacement and nitrogen filling in one stop.",
     applicableVehicles: ["All"],
-    icon: "sparkles",
-    priceFromText: "From ₹399",
+    icon: "wrench",
+    priceFromText: "From ₹149",
   },
   {
-    id: "tyre-replacement",
-    slug: "tyre-replacement",
-    name: "Tyre Replacement",
+    id: "car-washing",
+    slug: "car-washing",
+    name: "Car Washing",
     description:
-      "End-to-end tyre swap consultation, old-tyre buyback assessment and installation of your chosen new set.",
-    applicableVehicles: ["All"],
-    icon: "arrow-left-right",
-    priceFromText: "Quoted per tyre",
+      "Exterior wash, interior vacuum, tyre dressing and glass cleaning. Choose from basic, premium or foam wash packages.",
+    applicableVehicles: ["Hatchback", "Sedan", "SUV", "MUV", "Luxury"],
+    icon: "droplets",
+    priceFromText: "From ₹299",
   },
-];
-
-export function serviceById(id: string) {
-  return services.find((s) => s.id === id);
-}
-
-export function serviceBySlug(slug: string) {
-  return services.find((s) => s.slug === slug);
-}
+  {
+    id: "detailing-nitrogen",
+    slug: "detailing-nitrogen",
+    name: "Detailing & Nitrogen Filling",
+    description:
+      "Detailer-grade paint correction, ceramic coat prep, and nitrogen tyre inflation for longer pressure retention.",
+    applicableVehicles: ["All"],
+    icon: "sparkles",
+    priceFromText: "From ₹99",
+  },
+  {
+    id: "car-battery",
+    slug: "car-battery",
+    name: "Car Battery",
+    description:
+      "Free battery health check plus same-day replacement with top brands. Old battery buyback available.",
+    applicableVehicles: ["Hatchback", "Sedan", "SUV", "MUV", "Luxury", "Commercial Vehicle"],
+    icon: "battery-charging",
+    priceFromText: "From ₹1,999",
+  },
+  {
+    id: "car-accessories",
+    slug: "car-accessories",
+    name: "Car & Bike Accessories",
+    description:
+      "Seat covers, floor mats, dashcams, alloy locks, bike accessories and more — fitted at the dealer.",
+    applicableVehicles: ["All"],
+    icon: "package",
+    priceFromText: "Quoted per item",
+  },
+  {
+    id: "spare-parts",
+    slug: "spare-parts",
+    name: "Spare Parts",
+    description:
+      "Genuine and OEM-compatible spare parts sourced and fitted by verified dealers. Quick turnaround on common models.",
+    applicableVehicles: ["All"],
+    icon: "cog",
+    priceFromText: "Quoted per part",
+  },
+  {
+    id: "ev-vehicles",
+    slug: "ev-vehicles",
+    name: "E-Rickshaw & E-Scooty",
+    description:
+      "EV two-wheeler and three-wheeler sales, tyre fitment and battery servicing at AutoVerse partner dealers.",
+    applicableVehicles: ["E-Rickshaw", "E-Scooty"],
+    icon: "zap",
+    priceFromText: "Quoted on enquiry",
+  },
+  {
+    id: "used-tyres-alloys",
+    slug: "used-tyres-alloys",
+    name: "Used Tyres & Alloys",
+    description:
+      "Quality-checked second-hand tyres and alloy wheels. Significant savings for budget-conscious buyers.",
+    applicableVehicles: ["All"],
+    icon: "refresh-cw",
+    priceFromText: "From ₹499",
+  },
+  {
+    id: "insurance",
+ 

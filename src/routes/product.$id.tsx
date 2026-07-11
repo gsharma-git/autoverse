@@ -1,12 +1,10 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { Phone, Star, ArrowLeft, ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchProductById, fetchDealersForProduct, fetchRelatedProducts } from "@/lib/queries";
+import { fetchProductById, fetchDealersForProduct } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { formatINR } from "@/lib/format";
 import { EnquiryDialog } from "@/components/enquiry-dialog";
-import { ProductCard } from "@/components/product-card";
 import { WhatsAppIcon, DealerCard } from "@/components/dealer-card";
 import type { Product } from "@/data/types";
 
@@ -19,18 +17,15 @@ export const Route = createFileRoute("/product/$id")({
     if (!product) throw notFound();
     return { product, dealers };
   },
-  head: ({ loaderData, params }) => ({
+  head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.product.name} · ${loaderData.product.brand} · AutoVerse` },
+          { title: `${loaderData.product.name} · My Tyres & Alloys` },
           { name: "description", content: loaderData.product.tagline },
-          { property: "og:title", content: `${loaderData.product.name} · AutoVerse` },
+          { property: "og:title", content: `${loaderData.product.name} · My Tyres & Alloys` },
           { property: "og:description", content: loaderData.product.tagline },
-          { property: "og:url", content: `https://autoverse.in/product/${params.id}` },
-          { property: "og:type", content: "product" },
-          ...(loaderData.product.image ? [{ property: "og:image", content: loaderData.product.image }] : []),
         ]
-      : [{ title: "Product · AutoVerse" }, { name: "robots", content: "noindex" }],
+      : [{ title: "Product · My Tyres & Alloys" }, { name: "robots", content: "noindex" }],
   }),
   component: ProductPage,
   notFoundComponent: () => (
@@ -49,32 +44,8 @@ function ProductPage() {
   const brand = product.brandName ? { name: product.brandName } : { name: product.brandId };
   const [enquiryOpen, setEnquiryOpen] = useState(false);
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: product.name,
-    description: product.tagline,
-    brand: { "@type": "Brand", name: brand.name },
-    category: product.category === "tyre" ? "Tyre" : "Alloy Wheel",
-    image: product.image ?? undefined,
-    offers: {
-      "@type": "AggregateOffer",
-      priceCurrency: "INR",
-      lowPrice: product.priceFrom,
-      offerCount: dealers.length,
-      availability: dealers.length > 0
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-    },
-    url: `https://autoverse.in/product/${product.id}`,
-  };
-
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
       <Link to={product.category === "tyre" ? "/tyres" : "/alloys"} className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-brand">
         <ArrowLeft className="size-3" /> Back to {product.category === "tyre" ? "tyres" : "alloys"}
       </Link>
@@ -98,7 +69,7 @@ function ProductPage() {
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">{product.tagline}</p>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="mt-6 flex items-center gap-4">
             <div className="flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-sm font-semibold">
               <Star className="size-4 fill-amber-400 text-amber-400" /> {product.rating.toFixed(1)}
               <span className="ml-1 text-xs text-muted-foreground">({product.reviewCount} reviews)</span>
@@ -181,21 +152,47 @@ function ProductPage() {
         </div>
       </section>
 
-      <RelatedProducts product={product} />
-
       <EnquiryDialog open={enquiryOpen} onOpenChange={setEnquiryOpen} product={product} />
     </div>
   );
 }
 
-function RelatedProducts({ product }: { product: Product }) {
-  const { data: related = [], isLoading } = useQuery({
-    queryKey: ["related-products", product.id],
-    queryFn: () => fetchRelatedProducts(product.id, product.category, product.brandId),
-  });
-
-  if (!isLoading && related.length === 0) return null;
-
+function ProductVisual({ product }: { product: Product }) {
+  const isAlloy = product.category === "alloy";
   return (
-    <section className="mt-16 pb-16">
-      <h2 className="font-display text-2xl font-bold italic uppercase tracking-t
+    <div className="grid h-full place-items-center p-8">
+      <svg viewBox="0 0 400 400" className="h-full w-full">
+        <defs>
+          <radialGradient id="ring" cx="50%" cy="50%" r="50%">
+            <stop offset="70%" stopColor="oklch(0.16 0.02 264)" />
+            <stop offset="100%" stopColor="oklch(0.08 0.02 264)" />
+          </radialGradient>
+        </defs>
+        <circle cx="200" cy="200" r="180" fill="url(#ring)" />
+        <circle cx="200" cy="200" r="90" fill={isAlloy ? "oklch(0.55 0.02 264)" : "oklch(0.90 0.005 264)"} />
+        {isAlloy
+          ? Array.from({ length: 5 }).map((_, i) => (
+              <g key={i} transform={`rotate(${(i / 5) * 360} 200 200)`}>
+                <rect x="190" y="30" width="20" height="105" rx="8" fill="oklch(0.14 0.02 264)" />
+              </g>
+            ))
+          : Array.from({ length: 24 }).map((_, i) => {
+              const a = (i / 24) * Math.PI * 2;
+              return (
+                <line
+                  key={i}
+                  x1={200 + Math.cos(a) * 110}
+                  y1={200 + Math.sin(a) * 110}
+                  x2={200 + Math.cos(a) * 170}
+                  y2={200 + Math.sin(a) * 170}
+                  stroke="oklch(0.90 0.005 264)"
+                  strokeWidth="10"
+                />
+              );
+            })}
+        <circle cx="200" cy="200" r="30" fill="oklch(0.14 0.02 264)" />
+        <circle cx="200" cy="200" r="10" fill={isAlloy ? "oklch(0.55 0.02 264)" : "oklch(0.90 0.005 264)"} />
+      </svg>
+    </div>
+  );
+}

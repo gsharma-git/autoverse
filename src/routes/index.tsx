@@ -8,22 +8,6 @@ import { fetchProducts, fetchDealers, fetchServices, fetchBrands } from "@/lib/q
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "AutoVerse — India's Verified Tyre, Alloy & Auto Services Marketplace" },
-      {
-        name: "description",
-        content:
-          "Search tyres, alloys and auto services from verified dealers near you. Filter by vehicle, brand, size or pincode across 120+ Indian cities. Enquire in one tap.",
-      },
-      { property: "og:title", content: "AutoVerse — India's Verified Auto Parts & Services Marketplace" },
-      {
-        property: "og:description",
-        content: "Find the right tyre or alloy for your ride, sourced from verified local dealers. Enquiry-first, no online checkout.",
-      },
-      { property: "og:url", content: "https://autoverse.in" },
-    ],
-  }),
   component: Index,
 });
 
@@ -53,7 +37,7 @@ function Index() {
             <span className="inline-block rounded-full border border-ink/10 bg-background px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand">
               Verified · Enquiry-first · Local
             </span>
-            <h1 className="mt-6 font-display text-4xl font-bold uppercase italic leading-none tracking-tight text-foreground sm:text-5xl md:text-6xl">
+            <h1 className="mt-6 font-display text-5xl font-bold uppercase italic leading-none tracking-tight text-foreground md:text-6xl">
               Grip the road.<br />
               Own the style.
             </h1>
@@ -222,4 +206,17 @@ function Index() {
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="relative overflow-hidden rounded-3xl bg-brand p-10 text-brand-foreground md:p-14">
           <div className="max-w-lg">
-            <div className="inline-flex items-center gap-2 rounded-full bg-brand-foreground/10 px-3 py-1 text-[10px] font-bold uppercase tracki
+            <div className="inline-flex items-center gap-2 rounded-full bg-brand-foreground/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
+              <ShieldCheck className="size-3" />
+              For dealers
+            </div>
+            <h2 className="mt-4 font-display text-3xl font-bold italic uppercase tracking-tight md:text-4xl">
+              Grow your dealership.
+            </h2>
+            <p className="mt-3 text-brand-foreground/90">
+              List your inventory, capture qualified enquiries from your locality every week, and close
+              more offline sales without a middleman commission.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild size="lg" className="rounded-full bg-ink text-background hover:bg-ink/90">
+                <Link to="/vendor/register">Register as dealer</Lin

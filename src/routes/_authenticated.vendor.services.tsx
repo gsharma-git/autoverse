@@ -1,38 +1,76 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
-import { createVendorService, deleteVendorService, useStore } from "@/data/store";
+import {
+  createVendorService,
+  deleteVendorService,
+  updateVendorService,
+  useStore,
+  type VendorServiceRow,
+} from "@/data/store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Info, Pencil, Trash2 } from "lucide-react";
+import { StatusBadge } from "./_authenticated.vendor.products";
 
 export const Route = createFileRoute("/_authenticated/vendor/services")({
   component: VendorServices,
 });
+
+type FormState = { name: string; description: string; priceFromText: string };
+const emptyForm: FormState = { name: "", description: "", priceFromText: "" };
 
 function VendorServices() {
   const { session } = useAuth();
   const services = useStore((s) =>
     s.vendorServices.filter((v) => v.vendorId === session?.userId),
   );
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [priceFromText, setPrice] = useState("");
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<VendorServiceRow | null>(null);
+  const [form, setForm] = useState<FormState>(emptyForm);
   const [busy, setBusy] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  function openCreate() {
+    setEditing(null);
+    setForm(emptyForm);
+    setDialogOpen(true);
+  }
+
+  function openEdit(s: VendorServiceRow) {
+    setEditing(s);
+    setForm({ name: s.name, description: s.description, priceFromText: s.priceFromText });
+    setDialogOpen(true);
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!name) return toast.error("Service name is required");
+    if (!form.name) {
+      toast.error("Service name is required");
+      return;
+    }
     setBusy(true);
     try {
-      await createVendorService({ name, description, priceFromText });
-      toast.success("Service submitted for approval");
-      setOpen(false);
-      setName(""); setDescription(""); setPrice("");
+      if (editing) {
+        await updateVendorService(editing.id, form);
+        toast.success("Service updated — re-submitted for approval");
+      } else {
+        await createVendorService(form);
+        toast.success("Service submitted for approval");
+      }
+      setDialogOpen(false);
     } catch (err: any) {
       toast.error(err.message ?? "Failed");
     } finally {
@@ -40,9 +78,16 @@ function VendorServices() {
     }
   }
 
-  async function remove(id: string) {
-    try { await deleteVendorService(id); toast.success("Removed"); }
-    catch (err: any) { toast.error(err.message ?? "Failed"); }
+  async function confirmDelete() {
+    if (!deleteId) return;
+    try {
+      await deleteVendorService(deleteId);
+      toast.success("Service removed");
+    } catch (err: any) {
+      toast.error(err.message ?? "Failed");
+    } finally {
+      setDeleteId(null);
+    }
   }
 
   return (
@@ -50,57 +95,112 @@ function VendorServices() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-bold uppercase tracking-tight">Services offered</h2>
-          <p className="text-xs text-muted-foreground">
-            Add services your shop offers. Each entry is reviewed by an admin before being published.
-          </p>
+          <p className="text-xs text-muted-foreground">Manage the services your shop offers.</p>
         </div>
-        <Button className="rounded-full bg-brand text-brand-foreground hover:bg-brand/90" onClick={() => setOpen((o) => !o)}>
-          {open ? "Cancel" : "+ Add service"}
+        <Button className="rounded-full bg-brand text-brand-foreground hover:bg-brand/90" onClick={openCreate}>
+          + Add service
         </Button>
       </div>
 
-      {open && (
-        <form onSubmit={submit} className="mt-6 grid gap-4 rounded-xl border border-border bg-background p-4">
-          <Field label="Service name"><Input value={name} onChange={(e) => setName(e.target.value)} required placeholder="e.g. Wheel alignment" /></Field>
-          <Field label="Description"><Textarea rows={3} value={description} onChange={(e) => setDescription(e.target.value)} /></Field>
-          <Field label="Starting price"><Input value={priceFromText} onChange={(e) => setPrice(e.target.value)} placeholder="e.g. ₹499 onwards" /></Field>
-          <div className="flex justify-end">
-            <Button type="submit" disabled={busy} className="rounded-full bg-brand text-brand-foreground hover:bg-brand/90">
-              {busy ? "Saving…" : "Submit for approval"}
-            </Button>
-          </div>
-        </form>
-      )}
-
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        {services.map((s) => (
-          <div key={s.id} className="flex items-start justify-between gap-4 rounded-xl border border-border bg-background p-4">
-            <div>
-              <p className="text-sm font-semibold">{s.name}</p>
-              <p className="mt-1 text-xs text-muted-foreground">{s.priceFromText || "—"}</p>
-              <p className="mt-2 text-xs text-muted-foreground">{s.description}</p>
-            </div>
-            <div className="flex flex-col items-end gap-2">
-              <span className={cn(
-                "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest",
-                s.status === "approved" ? "bg-brand text-brand-foreground" :
-                s.status === "rejected" ? "bg-destructive/10 text-destructive" : "bg-secondary text-muted-foreground",
-              )}>{s.status}</span>
-              <button onClick={() => remove(s.id)} className="text-[10px] font-semibold text-destructive hover:underline">Delete</button>
-            </div>
-          </div>
-        ))}
-        {services.length === 0 && (
-          <p className="col-span-full py-8 text-center text-sm text-muted-foreground">No services yet.</p>
-        )}
+      <div className="mt-4 flex items-start gap-2 rounded-xl border border-border bg-secondary/40 p-3 text-xs text-muted-foreground">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+        <span>Services are reviewed by admin before going live. Editing an approved service will send it back to pending.</span>
       </div>
+
+      <div className="mt-6 overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead className="border-b border-border text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+            <tr>
+              <th className="py-2 pr-3">Name</th>
+              <th className="py-2 pr-3">Description</th>
+              <th className="py-2 pr-3">Starting price</th>
+              <th className="py-2 pr-3">Status</th>
+              <th className="py-2 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border">
+            {services.map((s) => (
+              <tr key={s.id}>
+                <td className="py-3 pr-3 font-semibold">{s.name}</td>
+                <td className="py-3 pr-3 max-w-md text-muted-foreground">
+                  <span className="line-clamp-2">{s.description || "—"}</span>
+                </td>
+                <td className="py-3 pr-3">{s.priceFromText || "—"}</td>
+                <td className="py-3 pr-3"><StatusBadge status={s.status} /></td>
+                <td className="py-3 text-right">
+                  <div className="flex justify-end gap-1">
+                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(s)} aria-label="Edit">
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-destructive" onClick={() => setDeleteId(s.id)} aria-label="Delete">
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+            {services.length === 0 && (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-muted-foreground">No services yet.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="font-display uppercase tracking-tight">
+              {editing ? "Edit service" : "Add service"}
+            </DialogTitle>
+            <DialogDescription>
+              {editing ? "Changes will be re-reviewed by admin." : "This service will be reviewed before going live."}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={submit} className="grid gap-4">
+            <Field label="Service name">
+              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required placeholder="e.g. Wheel alignment" />
+            </Field>
+            <Field label="Description">
+              <Textarea rows={4} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            </Field>
+            <Field label="Starting price">
+              <Input value={form.priceFromText} onChange={(e) => setForm({ ...form, priceFromText: e.target.value })} placeholder="e.g. From Rs. 499" />
+            </Field>
+            <DialogFooter>
+              <Button type="button" variant="ghost" className="rounded-full" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button type="submit" disabled={busy} className="rounded-full bg-brand text-brand-foreground hover:bg-brand/90">
+                {busy ? "Saving..." : editing ? "Save changes" : "Submit for approval"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={!!deleteId} onOpenChange={(o) => !o && setDeleteId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this service?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove the service from your listing. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90" onClick={confirmDelete}>
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="grid gap-1.5">
+    <div className={cn("grid gap-1.5")}>
       <Label>{label}</Label>
       {children}
     </div>

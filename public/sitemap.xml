@@ -43,23 +43,13 @@
     <priority>0.5</priority>
   </url>
 
-  <!--
-    Dynamic pages (dealer/$id, product/$id, service/$id) are not listed here
-    because their URLs depend on Supabase data.
+  <!-- Dealer pages (0) -->
 
-    To generate a full sitemap with dynamic URLs, run a build-time script:
 
-      node scripts/generate-sitemap.mjs
+  <!-- Product pages (0) -->
 
-    This script queries Supabase for all published dealer/product/service IDs
-    and appends them to this file. Add it to your CI pipeline or deploy hook.
 
-    Example entry for a dealer:
-    <url>
-      <loc>https://autoverse.in/dealer/d-123</loc>
-      <changefreq>weekly</changefreq>
-      <priority>0.8</priority>
-    </url>
-  -->
+  <!-- Service pages (0) -->
+
 
 </urlset>

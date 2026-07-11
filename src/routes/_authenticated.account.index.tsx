@@ -69,16 +69,4 @@ function AccountOverview() {
             </p>
           )}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function Stat({ label, value, to }: { label: string; value: number; to: string }) {
-  return (
-    <Link to={to} className="rounded-2xl border border-border bg-card p-5 transition-colors hover:border-brand">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
-      <p className="mt-2 font-display text-3xl font-bold">{value}</p>
-    </Link>
-  );
-}
+      </di

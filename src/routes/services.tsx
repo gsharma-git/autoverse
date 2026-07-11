@@ -6,9 +6,9 @@ import { fetchServices } from "@/lib/queries";
 export const Route = createFileRoute("/services")({
   head: () => ({
     meta: [
-      { title: "In-shop Services · My Tyres & Alloys" },
+      { title: "In-shop Services · AutoVerse" },
       { name: "description", content: "Wheel alignment, balancing, puncture repair, nitrogen filling and more — offered by verified dealers near you." },
-      { property: "og:title", content: "Tyre & Alloy Services · My Tyres & Alloys" },
+      { property: "og:title", content: "Auto Services · AutoVerse" },
       { property: "og:description", content: "Every service is enquiry-first: connect with a nearby dealer in one tap." },
     ],
   }),
@@ -50,12 +50,4 @@ function ServicesPage() {
                 {s.priceFromText}
               </span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-                {s.applicableVehicles.join(" · ")}
-              </span>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
-}
+   

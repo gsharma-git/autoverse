@@ -5,18 +5,6 @@ import { useQuery } from "@tanstack/react-query";
 import { fetchDealerById, fetchProducts } from "@/lib/queries";
 import { tierById } from "@/data/membership";
 import { relativeTime } from "@/lib/format";
-import { useMemo } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-} from "recharts";
 
 export const Route = createFileRoute("/_authenticated/vendor/")({
   component: VendorDashboard,
@@ -49,35 +37,8 @@ function VendorDashboard() {
   const tier = tierById(dealer.membership);
   const newCount = enquiries.filter((e) => e.status === "new").length;
 
-  // ── Analytics derivations ──────────────────────────────────────────────
-  const weeklyTrend = useMemo(() => {
-    const weeks: { week: string; count: number }[] = [];
-    const now = Date.now();
-    for (let i = 5; i >= 0; i--) {
-      const start = now - (i + 1) * 7 * 24 * 60 * 60 * 1000;
-      const end = now - i * 7 * 24 * 60 * 60 * 1000;
-      const label = i === 0 ? "This wk" : i === 1 ? "Last wk" : `${i + 1}w ago`;
-      weeks.push({
-        week: label,
-        count: enquiries.filter((e) => e.createdAt >= start && e.createdAt < end).length,
-      });
-    }
-    return weeks;
-  }, [enquiries]);
-
-  const statusBreakdown = useMemo(() => {
-    const counts = { new: 0, contacted: 0, closed: 0 };
-    enquiries.forEach((e) => { counts[e.status]++; });
-    return [
-      { name: "New", value: counts.new, color: "var(--color-brand)" },
-      { name: "Contacted", value: counts.contacted, color: "oklch(0.6 0.15 240)" },
-      { name: "Closed", value: counts.closed, color: "oklch(0.7 0.05 150)" },
-    ].filter((s) => s.value > 0);
-  }, [enquiries]);
-
   return (
     <div className="grid gap-6">
-      {/* ── Stat cards ── */}
       <div className="grid gap-4 sm:grid-cols-4">
         <StatCard label="New enquiries" value={newCount} />
         <StatCard label="Total enquiries" value={dealer.enquiryCount + enquiries.length} />
@@ -85,9 +46,39 @@ function VendorDashboard() {
         <StatCard label="Rating" value={dealer.rating} suffix="★" />
       </div>
 
-      {/* ── Membership tier strip ── */}
       <div className="rounded-2xl border border-brand/30 bg-brand/5 p-6">
         <p className="text-[10px] font-bold uppercase tracking-widest text-brand">Current tier</p>
         <div className="mt-1 flex items-end justify-between gap-4">
           <div>
-            <h3
+            <h3 className="font-display text-2xl font-bold uppercase tracking-tight">{tier.name}</h3>
+            <p className="text-sm text-muted-foreground">{tier.tagline}</p>
+          </div>
+          <p className="font-display text-xl font-bold">{tier.priceText}</p>
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-border bg-card p-6">
+        <h3 className="font-display text-lg font-bold uppercase tracking-tight">Recent enquiries</h3>
+        <div className="mt-4 divide-y divide-border">
+          {enquiries.slice(0, 5).map((e) => {
+            const p = e.productId ? productMap[e.productId] : null;
+            return (
+              <div key={e.id} className="grid gap-2 py-3 md:grid-cols-[1fr_auto] md:items-center">
+                <div>
+                  <p className="text-sm font-semibold">{p?.name ?? "Service enquiry"} — {e.customerName}</p>
+                  <p className="text-xs text-muted-foreground">{e.message}</p>
+                </div>
+                <span className="text-xs text-muted-foreground">{relativeTime(e.createdAt)}</span>
+              </div>
+            );
+          })}
+          {enquiries.length === 0 && (
+            <p className="py-6 text-sm text-muted-foreground">No enquiries yet.</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, suffix }: { label: string; value: number | string; suffix?: strin

@@ -41,7 +41,7 @@ export function SiteHeader() {
               <span className="block size-3 rounded-full border-2 border-brand-foreground" />
             </span>
             <span className="font-display text-lg font-bold uppercase tracking-tight text-foreground">
-              My Tyres <span className="text-brand">&</span> Alloys
+              Auto<span className="text-brand">Verse</span>
             </span>
           </Link>
         </div>

@@ -314,15 +314,6 @@ export async function createEnquiry(input: {
   };
   const { data, error } = await supabase.from("enquiries").insert(insert).select().single();
   if (error) throw error;
-
-  // Fire-and-forget: email notification via Edge Function.
-  // The SQL trigger (notify_enquiry_webhook) handles this server-side when pg_net is
-  // configured.  This client-side invoke is a reliable fallback for environments where
-  // pg_net is not yet set up.  If both are active, disable one to avoid duplicate emails.
-  supabase.functions
-    .invoke("notify-enquiry", { body: { type: "INSERT", record: data } })
-    .catch(() => { /* non-fatal — enquiry was already saved */ });
-
   return mapEnquiry(data);
 }
 
@@ -464,39 +455,48 @@ export async function createVendorProduct(input: {
   if (error) throw error;
 }
 
-export async function updateVendorProduct(
-  id: string,
-  input: {
-    name: string;
-    category: "tyre" | "alloy";
-    brand: string;
-    size: string;
-    price: number;
-    image?: string | null;
-  },
-) {
-  const { error } = await supabase
-    .from("vendor_products")
-    .update({
-      name: input.name,
-      category: input.category,
-      brand: input.brand,
-      size: input.size,
-      price: input.price,
-      image: input.image ?? null,
-      status: "pending", // re-submit for approval on edit
-    })
-    .eq("id", id);
+export async function deleteVendorProduct(id: string) {
+  const { error } = await supabase.from("vendor_products").delete().eq("id", id);
   if (error) throw error;
 }
 
-export async function uploadVendorImage(file: File): Promise<string> {
-  if (!state.currentUserId) throw new Error("Not signed in");
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const path = `${state.currentUserId}/${Date.now()}.${ext}`;
-  const { error } = await supabase.storage
-    .from("vendor-images")
-    .upload(path, file, { upsert: true });
+export async function moderateVendorProduct(id: string, status: "approved" | "rejected") {
+  const { error } = await supabase.from("vendor_products").update({ status }).eq("id", id);
   if (error) throw error;
-  const { data } = supabase.storage.from("vendor-images").getPublicUrl(path);
-  
+}
+
+export async function createVendorService(input: {
+  name: string;
+  description: string;
+  priceFromText: string;
+}) {
+  if (!state.currentUserId) throw new Error("Not signed in");
+  const { error } = await supabase.from("vendor_services").insert({
+    vendor_id: state.currentUserId,
+    name: input.name,
+    description: input.description,
+    price_from_text: input.priceFromText,
+  });
+  if (error) throw error;
+}
+
+export async function deleteVendorService(id: string) {
+  const { error } = await supabase.from("vendor_services").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function moderateVendorService(id: string, status: "approved" | "rejected") {
+  const { error } = await supabase.from("vendor_services").update({ status }).eq("id", id);
+  if (error) throw error;
+}
+
+export function resetStore() {
+  // No-op in real-backend mode; kept for compatibility with the admin settings page.
+  return;
+}
+
+export function dealerFromVendor(vendorAuthId: string) {
+  const vendor = state.vendors.find((v) => v.id === vendorAuthId);
+  if (!vendor) return undefined;
+  return dealers.find((d) => d.id === vendor.dealerId);
+}

@@ -10,9 +10,9 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact · My Tyres & Alloys" },
-      { name: "description", content: "Get in touch with the My Tyres & Alloys team — customer support, dealer partnerships, press." },
-      { property: "og:title", content: "Contact · My Tyres & Alloys" },
+      { title: "Contact · AutoVerse" },
+      { name: "description", content: "Get in touch with the AutoVerse team — customer support, dealer partnerships, press." },
+      { property: "og:title", content: "Contact · AutoVerse" },
       { property: "og:description", content: "Reach out for help, feedback or to partner with us." },
     ],
   }),

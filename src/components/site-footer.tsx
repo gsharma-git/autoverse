@@ -11,7 +11,7 @@ export function SiteFooter() {
                 <span className="block size-3 rounded-full border-2 border-background" />
               </span>
               <span className="font-display text-lg font-bold uppercase tracking-tight">
-                My Tyres <span className="text-brand">&</span> Alloys
+                Auto<span className="text-brand">Verse</span>
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">
@@ -39,7 +39,7 @@ export function SiteFooter() {
               <li><Link to="/membership" className="text-foreground/80 hover:text-brand">Membership Plans</Link></li>
               <li><Link to="/login" className="text-foreground/80 hover:text-brand">Dealer Login</Link></li>
               <li><Link to="/vendor/register" className="text-foreground/80 hover:text-brand">List your business</Link></li>
-              <li><Link to="/about" className="text-foreground/80 hover:text-brand">Why My Tyres & Alloys</Link></li>
+              <li><Link to="/about" className="text-foreground/80 hover:text-brand">Why AutoVerse</Link></li>
             </ul>
           </div>
 
@@ -70,7 +70,7 @@ export function SiteFooter() {
             </div>
           </div>
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} My Tyres &amp; Alloys India. All rights reserved.
+            © {new Date().getFullYear()} AutoVerse India. All rights reserved.
           </p>
         </div>
       </div>

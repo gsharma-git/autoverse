@@ -18,12 +18,12 @@ export const Route = createFileRoute("/service/$id")({
   head: ({ loaderData }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.service.name} · My Tyres & Alloys` },
+          { title: `${loaderData.service.name} · AutoVerse` },
           { name: "description", content: loaderData.service.description },
-          { property: "og:title", content: `${loaderData.service.name} · My Tyres & Alloys` },
+          { property: "og:title", content: `${loaderData.service.name} · AutoVerse` },
           { property: "og:description", content: loaderData.service.description },
         ]
-      : [{ title: "Service · My Tyres & Alloys" }, { name: "robots", content: "noindex" }],
+      : [{ title: "Service · AutoVerse" }, { name: "robots", content: "noindex" }],
   }),
   component: ServiceDetail,
   notFoundComponent: () => (

@@ -20,12 +20,4 @@ function FavDealers() {
     <div className="rounded-2xl border border-border bg-card p-6">
       <h2 className="font-display text-lg font-bold uppercase tracking-tight">Saved dealers</h2>
       {dealers.length === 0 ? (
-        <p className="mt-4 text-sm text-muted-foreground">Save dealers to quickly reach them later.</p>
-      ) : (
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          {dealers.map((d) => d && <DealerCard key={d.id} dealer={d} />)}
-        </div>
-      )}
-    </div>
-  );
-}
+        <p className="mt-4 text-sm text-muted-foreground">Save dealers to quickly reach th

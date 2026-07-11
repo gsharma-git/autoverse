@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About · My Tyres & Alloys" },
-      { name: "description", content: "India's enquiry-first tyre and alloy marketplace. We connect customers with verified local dealers." },
-      { property: "og:title", content: "About · My Tyres & Alloys" },
+      { title: "About · AutoVerse" },
+      { name: "description", content: "India's enquiry-first auto parts and services marketplace. We connect customers with verified local dealers." },
+      { property: "og:title", content: "About · AutoVerse" },
       { property: "og:description", content: "Built to give verified dealers better visibility and customers a faster route to the right shop." },
     ],
   }),
@@ -24,7 +24,7 @@ function AboutPage() {
             Built for the road, not the checkout.
           </h1>
           <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-            My Tyres &amp; Alloys is India&apos;s enquiry-first marketplace for tyres and alloy wheels.
+            AutoVerse is India&apos;s enquiry-first marketplace for tyres, alloys and auto services.
             Instead of pushing you through an online checkout that ignores fitment, stock and local
             expertise, we hand you a shortlist of verified dealers within minutes.
           </p>

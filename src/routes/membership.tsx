@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 export const Route = createFileRoute("/membership")({
   head: () => ({
     meta: [
-      { title: "Dealer Membership Plans · My Tyres & Alloys" },
+      { title: "Dealer Membership Plans · AutoVerse" },
       { name: "description", content: "Compare Free, Silver, Gold and Diamond membership tiers for tyre and alloy dealers. Grow your local enquiry pipeline." },
-      { property: "og:title", content: "Dealer Membership · My Tyres & Alloys" },
+      { property: "og:title", content: "Dealer Membership · AutoVerse" },
       { property: "og:description", content: "Free → Diamond. Scale visibility and lead volume as you grow." },
     ],
   }),

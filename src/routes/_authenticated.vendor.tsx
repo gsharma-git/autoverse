@@ -59,16 +59,4 @@ function VendorLayout() {
                 activeOptions={{ exact: n.exact }}
                 activeProps={{ className: "bg-secondary text-foreground" }}
               >
-                <n.icon className="size-4" />
-                {n.label}
-              </Link>
-            ))}
-          </nav>
-        </aside>
-        <div>
-          <Outlet />
-        </div>
-      </div>
-    </div>
-  );
-}
+                <n.icon className

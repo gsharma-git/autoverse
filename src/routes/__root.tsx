@@ -83,16 +83,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "My Tyres & Alloys — India's Verified Tyre & Alloy Marketplace" },
+      { title: "AutoVerse — India's Verified Auto Parts & Services Marketplace" },
       {
         name: "description",
         content:
-          "Discover, compare and connect with verified tyre & alloy dealers near you. Search by vehicle, brand, size or pincode across 120+ Indian cities.",
+          "Discover, compare and connect with verified tyre, alloy and auto service dealers near you. Search by vehicle, brand, size or pincode across 120+ Indian cities.",
       },
-      { name: "author", content: "My Tyres & Alloys" },
+      { name: "author", content: "AutoVerse" },
       {
         property: "og:title",
-        content: "My Tyres & Alloys — India's Verified Tyre & Alloy Marketplace",
+        content: "AutoVerse — India's Verified Auto Parts & Services Marketplace",
       },
       {
         property: "og:description",
@@ -148,6 +148,4 @@ function RootComponent() {
         </div>
         <Toaster />
       </AuthProvider>
-    </QueryClientProvider>
-  );
-}
+    </QueryClientProvide

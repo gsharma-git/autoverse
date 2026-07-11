@@ -7,7 +7,6 @@
     "dev": "vite dev",
     "build": "vite build",
     "build:dev": "vite build --mode development",
-    "build:s3": "vite build --config vite.config.s3.ts && node scripts/create-spa-index.mjs",
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write ."

@@ -1,14 +1,22 @@
 import { createFileRoute, useNavigate, useSearch, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { UserRound, Store, ShieldCheck, Mail, Lock } from "lucide-react";
+import { UserRound, Store, ShieldCheck, Mail, Lock, Phone, Car, MapPin } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
+
+const VEHICLE_TYPES = [
+  "Hatchback", "Sedan", "SUV", "MUV", "Luxury Car",
+  "Bike / Scooter", "Commercial Vehicle", "Tractor", "Other",
+];
 
 const search = z.object({
   mode: z.enum(["signin", "signup"]).optional(),
@@ -19,8 +27,8 @@ export const Route = createFileRoute("/login")({
   validateSearch: search,
   head: () => ({
     meta: [
-      { title: "Sign in · My Tyres & Alloys" },
-      { name: "description", content: "Sign in or create an account as a customer or dealer on My Tyres & Alloys." },
+      { title: "Sign in - AutoVerse" },
+      { name: "description", content: "Sign in or create an account as a customer or dealer on AutoVerse." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -36,6 +44,9 @@ function LoginPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [phone, setPhone] = useState("");
+  const [vehicle, setVehicle] = useState("");
+  const [pincode, setPincode] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -45,15 +56,18 @@ function LoginPage() {
     }
   }, [session, nav]);
 
-
-  function redirectByRole(role: string) {
-    if (role === "admin") nav({ to: "/admin" });
-    else if (role === "vendor") nav({ to: "/vendor" });
+  function redirectByRole(r: string) {
+    if (r === "admin") nav({ to: "/admin" });
+    else if (r === "vendor") nav({ to: "/vendor" });
     else nav({ to: "/account" });
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (mode === "signup" && role === "customer" && (!phone || !vehicle || !pincode)) {
+      toast.error("Please fill in phone, vehicle type and pincode");
+      return;
+    }
     setLoading(true);
     try {
       if (mode === "signup") {
@@ -62,7 +76,7 @@ function LoginPage() {
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: { name, role },
+            data: { name, role, phone, vehicle, pincode },
           },
         });
         if (error) throw error;
@@ -74,7 +88,6 @@ function LoginPage() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        // hydration triggers via onAuthStateChange; briefly wait for role resolve
         await refreshRole();
         toast.success("Welcome back");
       }
@@ -149,8 +162,43 @@ function LoginPage() {
             </div>
           </div>
 
+          {mode === "signup" && role === "customer" && (
+            <>
+              <div className="grid gap-1.5">
+                <Label htmlFor="phone">Phone number</Label>
+                <div className="relative">
+                  <Phone className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required placeholder="+91 98765 43210" className="pl-9" />
+                </div>
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="vehicle">Vehicle type</Label>
+                <div className="relative">
+                  <Car className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground z-10" />
+                  <Select value={vehicle} onValueChange={setVehicle}>
+                    <SelectTrigger className="pl-9" id="vehicle">
+                      <SelectValue placeholder="Select vehicle type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {VEHICLE_TYPES.map((v) => (
+                        <SelectItem key={v} value={v}>{v}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <div className="grid gap-1.5">
+                <Label htmlFor="pincode">Pincode</Label>
+                <div className="relative">
+                  <MapPin className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input id="pincode" value={pincode} onChange={(e) => setPincode(e.target.value)} required placeholder="e.g. 400001" maxLength={6} className="pl-9" />
+                </div>
+              </div>
+            </>
+          )}
+
           <Button type="submit" disabled={loading} className="rounded-full bg-brand text-brand-foreground hover:bg-brand/90">
-            {loading ? "Please wait…" : mode === "signin" ? "Sign in" : `Create ${role} account`}
+            {loading ? "Please wait..." : mode === "signin" ? "Sign in" : "Create " + role + " account"}
           </Button>
 
           <div className="relative py-2 text-center text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
@@ -163,7 +211,7 @@ function LoginPage() {
           </Button>
 
           <p className="text-center text-xs text-muted-foreground">
-            <Link to="/" className="hover:text-foreground">← Back to home</Link>
+            <Link to="/" className="hover:text-foreground">Back to home</Link>
           </p>
         </div>
       </form>
@@ -189,9 +237,9 @@ function RoleCard({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className={`flex flex-col items-start gap-2 rounded-2xl border p-3 text-left transition-colors ${
-        active ? "border-brand bg-brand/5" : "border-border"
-      } ${disabled ? "cursor-not-allowed opacity-60" : "hover:border-brand"}`}
+      className={"flex flex-col items-start gap-2 rounded-2xl border p-3 text-left transition-colors " +
+        (active ? "border-brand bg-brand/5 " : "border-border ") +
+        (disabled ? "cursor-not-allowed opacity-60" : "hover:border-brand")}
     >
       <span className="grid size-8 place-items-center rounded-full bg-secondary">{icon}</span>
       <span className="text-xs font-semibold">{label}</span>
