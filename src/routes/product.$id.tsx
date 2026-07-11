@@ -19,15 +19,18 @@ export const Route = createFileRoute("/product/$id")({
     if (!product) throw notFound();
     return { product, dealers };
   },
-  head: ({ loaderData }) => ({
+  head: ({ loaderData, params }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.product.name} · My Tyres & Alloys` },
+          { title: `${loaderData.product.name} · ${loaderData.product.brand} · AutoVerse` },
           { name: "description", content: loaderData.product.tagline },
-          { property: "og:title", content: `${loaderData.product.name} · My Tyres & Alloys` },
+          { property: "og:title", content: `${loaderData.product.name} · AutoVerse` },
           { property: "og:description", content: loaderData.product.tagline },
+          { property: "og:url", content: `https://autoverse.in/product/${params.id}` },
+          { property: "og:type", content: "product" },
+          ...(loaderData.product.image ? [{ property: "og:image", content: loaderData.product.image }] : []),
         ]
-      : [{ title: "Product · My Tyres & Alloys" }, { name: "robots", content: "noindex" }],
+      : [{ title: "Product · AutoVerse" }, { name: "robots", content: "noindex" }],
   }),
   component: ProductPage,
   notFoundComponent: () => (
@@ -46,8 +49,32 @@ function ProductPage() {
   const brand = product.brandName ? { name: product.brandName } : { name: product.brandId };
   const [enquiryOpen, setEnquiryOpen] = useState(false);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.tagline,
+    brand: { "@type": "Brand", name: brand.name },
+    category: product.category === "tyre" ? "Tyre" : "Alloy Wheel",
+    image: product.image ?? undefined,
+    offers: {
+      "@type": "AggregateOffer",
+      priceCurrency: "INR",
+      lowPrice: product.priceFrom,
+      offerCount: dealers.length,
+      availability: dealers.length > 0
+        ? "https://schema.org/InStock"
+        : "https://schema.org/OutOfStock",
+    },
+    url: `https://autoverse.in/product/${product.id}`,
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Link to={product.category === "tyre" ? "/tyres" : "/alloys"} className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-brand">
         <ArrowLeft className="size-3" /> Back to {product.category === "tyre" ? "tyres" : "alloys"}
       </Link>
@@ -71,7 +98,7 @@ function ProductPage() {
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">{product.tagline}</p>
 
-          <div className="mt-6 flex items-center gap-4">
+          <div className="mt-6 flex flex-wrap items-center gap-3">
             <div className="flex items-center gap-1 rounded-full bg-secondary px-3 py-1 text-sm font-semibold">
               <Star className="size-4 fill-amber-400 text-amber-400" /> {product.rating.toFixed(1)}
               <span className="ml-1 text-xs text-muted-foreground">({product.reviewCount} reviews)</span>
@@ -171,32 +198,4 @@ function RelatedProducts({ product }: { product: Product }) {
 
   return (
     <section className="mt-16 pb-16">
-      <h2 className="font-display text-2xl font-bold italic uppercase tracking-tight">
-        You may also like
-      </h2>
-      <div className="mt-6 -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
-        {isLoading
-          ? Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-80 w-64 shrink-0 animate-pulse snap-start rounded-2xl border border-border bg-secondary/40 md:w-auto"
-              />
-            ))
-          : related.map((p) => (
-              <div key={p.id} className="w-64 shrink-0 snap-start md:w-auto">
-                <ProductCard product={p} />
-              </div>
-            ))}
-      </div>
-    </section>
-  );
-}
-
-function ProductVisual({ product }: { product: Product }) {
-  const isAlloy = product.category === "alloy";
-  return (
-    <div className="grid h-full place-items-center p-8">
-      <svg viewBox="0 0 400 400" className="h-full w-full">
-        <defs>
-          <radialGradient id="ring" cx="50%" cy="50%" r="50%">
-            <s
+      <h2 className="font-display text-2xl font-bold italic uppercase tracking-t

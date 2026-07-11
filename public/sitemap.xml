@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Static pages -->
+  <url>
+    <loc>https://autoverse.in/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://autoverse.in/dealers</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://autoverse.in/tyres</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://autoverse.in/alloys</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://autoverse.in/services</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://autoverse.in/membership</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://autoverse.in/about</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://autoverse.in/contact</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>
+
+  <!--
+    Dynamic pages (dealer/$id, product/$id, service/$id) are not listed here
+    because their URLs depend on Supabase data.
+
+    To generate a full sitemap with dynamic URLs, run a build-time script:
+
+      node scripts/generate-sitemap.mjs
+
+    This script queries Supabase for all published dealer/product/service IDs
+    and appends them to this file. Add it to your CI pipeline or deploy hook.
+
+    Example entry for a dealer:
+    <url>
+      <loc>https://autoverse.in/dealer/d-123</loc>
+      <changefreq>weekly</changefreq>
+      <priority>0.8</priority>
+    </url>
+  -->
+
+</urlset>
