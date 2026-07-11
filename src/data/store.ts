@@ -314,6 +314,15 @@ export async function createEnquiry(input: {
   };
   const { data, error } = await supabase.from("enquiries").insert(insert).select().single();
   if (error) throw error;
+
+  // Fire-and-forget: email notification via Edge Function.
+  // The SQL trigger (notify_enquiry_webhook) handles this server-side when pg_net is
+  // configured.  This client-side invoke is a reliable fallback for environments where
+  // pg_net is not yet set up.  If both are active, disable one to avoid duplicate emails.
+  supabase.functions
+    .invoke("notify-enquiry", { body: { type: "INSERT", record: data } })
+    .catch(() => { /* non-fatal — enquiry was already saved */ });
+
   return mapEnquiry(data);
 }
 
@@ -485,18 +494,4 @@ export async function deleteVendorService(id: string) {
   if (error) throw error;
 }
 
-export async function moderateVendorService(id: string, status: "approved" | "rejected") {
-  const { error } = await supabase.from("vendor_services").update({ status }).eq("id", id);
-  if (error) throw error;
-}
-
-export function resetStore() {
-  // No-op in real-backend mode; kept for compatibility with the admin settings page.
-  return;
-}
-
-export function dealerFromVendor(vendorAuthId: string) {
-  const vendor = state.vendors.find((v) => v.id === vendorAuthId);
-  if (!vendor) return undefined;
-  return dealers.find((d) => d.id === vendor.dealerId);
-}
+export async function moderateVendorService(id: string, status: "a
