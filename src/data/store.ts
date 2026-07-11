@@ -464,34 +464,39 @@ export async function createVendorProduct(input: {
   if (error) throw error;
 }
 
-export async function deleteVendorProduct(id: string) {
-  const { error } = await supabase.from("vendor_products").delete().eq("id", id);
+export async function updateVendorProduct(
+  id: string,
+  input: {
+    name: string;
+    category: "tyre" | "alloy";
+    brand: string;
+    size: string;
+    price: number;
+    image?: string | null;
+  },
+) {
+  const { error } = await supabase
+    .from("vendor_products")
+    .update({
+      name: input.name,
+      category: input.category,
+      brand: input.brand,
+      size: input.size,
+      price: input.price,
+      image: input.image ?? null,
+      status: "pending", // re-submit for approval on edit
+    })
+    .eq("id", id);
   if (error) throw error;
 }
 
-export async function moderateVendorProduct(id: string, status: "approved" | "rejected") {
-  const { error } = await supabase.from("vendor_products").update({ status }).eq("id", id);
-  if (error) throw error;
-}
-
-export async function createVendorService(input: {
-  name: string;
-  description: string;
-  priceFromText: string;
-}) {
+export async function uploadVendorImage(file: File): Promise<string> {
   if (!state.currentUserId) throw new Error("Not signed in");
-  const { error } = await supabase.from("vendor_services").insert({
-    vendor_id: state.currentUserId,
-    name: input.name,
-    description: input.description,
-    price_from_text: input.priceFromText,
-  });
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const path = `${state.currentUserId}/${Date.now()}.${ext}`;
+  const { error } = await supabase.storage
+    .from("vendor-images")
+    .upload(path, file, { upsert: true });
   if (error) throw error;
-}
-
-export async function deleteVendorService(id: string) {
-  const { error } = await supabase.from("vendor_services").delete().eq("id", id);
-  if (error) throw error;
-}
-
-export async function moderateVendorService(id: string, status: "a
+  const { data } = supabase.storage.from("vendor-images").getPublicUrl(path);
+  
