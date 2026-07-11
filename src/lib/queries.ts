@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Product, Dealer, Service, Brand } from "@/data/types";
+import type { Product, Dealer, Service, Brand, Review } from "@/data/types";
 
 // ── Mappers ────────────────────────────────────────────────────────────────
 
@@ -174,5 +174,4 @@ export async function fetchBrands(category?: "tyre" | "alloy"): Promise<Brand[]>
   if (category) q = (q as any).eq("category", category);
   const { data, error } = await (q as any).order("name");
   if (error) throw error;
-  return (data ?? []).map(mapBrand);
-}
+  return (data ?? []).map(mapBr

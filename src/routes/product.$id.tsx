@@ -1,10 +1,12 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
 import { Phone, Star, ArrowLeft, ShieldCheck } from "lucide-react";
 import { useState } from "react";
-import { fetchProductById, fetchDealersForProduct } from "@/lib/queries";
+import { useQuery } from "@tanstack/react-query";
+import { fetchProductById, fetchDealersForProduct, fetchRelatedProducts } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { formatINR } from "@/lib/format";
 import { EnquiryDialog } from "@/components/enquiry-dialog";
+import { ProductCard } from "@/components/product-card";
 import { WhatsAppIcon, DealerCard } from "@/components/dealer-card";
 import type { Product } from "@/data/types";
 
@@ -152,8 +154,41 @@ function ProductPage() {
         </div>
       </section>
 
+      <RelatedProducts product={product} />
+
       <EnquiryDialog open={enquiryOpen} onOpenChange={setEnquiryOpen} product={product} />
     </div>
+  );
+}
+
+function RelatedProducts({ product }: { product: Product }) {
+  const { data: related = [], isLoading } = useQuery({
+    queryKey: ["related-products", product.id],
+    queryFn: () => fetchRelatedProducts(product.id, product.category, product.brandId),
+  });
+
+  if (!isLoading && related.length === 0) return null;
+
+  return (
+    <section className="mt-16 pb-16">
+      <h2 className="font-display text-2xl font-bold italic uppercase tracking-tight">
+        You may also like
+      </h2>
+      <div className="mt-6 -mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 md:mx-0 md:grid md:grid-cols-4 md:gap-6 md:overflow-visible md:px-0 md:pb-0">
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="h-80 w-64 shrink-0 animate-pulse snap-start rounded-2xl border border-border bg-secondary/40 md:w-auto"
+              />
+            ))
+          : related.map((p) => (
+              <div key={p.id} className="w-64 shrink-0 snap-start md:w-auto">
+                <ProductCard product={p} />
+              </div>
+            ))}
+      </div>
+    </section>
   );
 }
 
@@ -164,35 +199,4 @@ function ProductVisual({ product }: { product: Product }) {
       <svg viewBox="0 0 400 400" className="h-full w-full">
         <defs>
           <radialGradient id="ring" cx="50%" cy="50%" r="50%">
-            <stop offset="70%" stopColor="oklch(0.16 0.02 264)" />
-            <stop offset="100%" stopColor="oklch(0.08 0.02 264)" />
-          </radialGradient>
-        </defs>
-        <circle cx="200" cy="200" r="180" fill="url(#ring)" />
-        <circle cx="200" cy="200" r="90" fill={isAlloy ? "oklch(0.55 0.02 264)" : "oklch(0.90 0.005 264)"} />
-        {isAlloy
-          ? Array.from({ length: 5 }).map((_, i) => (
-              <g key={i} transform={`rotate(${(i / 5) * 360} 200 200)`}>
-                <rect x="190" y="30" width="20" height="105" rx="8" fill="oklch(0.14 0.02 264)" />
-              </g>
-            ))
-          : Array.from({ length: 24 }).map((_, i) => {
-              const a = (i / 24) * Math.PI * 2;
-              return (
-                <line
-                  key={i}
-                  x1={200 + Math.cos(a) * 110}
-                  y1={200 + Math.sin(a) * 110}
-                  x2={200 + Math.cos(a) * 170}
-                  y2={200 + Math.sin(a) * 170}
-                  stroke="oklch(0.90 0.005 264)"
-                  strokeWidth="10"
-                />
-              );
-            })}
-        <circle cx="200" cy="200" r="30" fill="oklch(0.14 0.02 264)" />
-        <circle cx="200" cy="200" r="10" fill={isAlloy ? "oklch(0.55 0.02 264)" : "oklch(0.90 0.005 264)"} />
-      </svg>
-    </div>
-  );
-}
+            <s

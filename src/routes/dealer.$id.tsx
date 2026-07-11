@@ -1,12 +1,15 @@
 import { createFileRoute, notFound, Link } from "@tanstack/react-router";
-import { Phone, Star, ShieldCheck, MapPin, Clock, ArrowLeft } from "lucide-react";
+import { Phone, Star, ShieldCheck, MapPin, Clock, ArrowLeft, BadgeCheck } from "lucide-react";
 import { useState } from "react";
-import { fetchDealerById, fetchProductsForDealer, fetchServicesForDealer } from "@/lib/queries";
+import { useQuery } from "@tanstack/react-query";
+import { fetchDealerById, fetchProductsForDealer, fetchServicesForDealer, fetchReviewsForDealer } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { WhatsAppIcon } from "@/components/dealer-card";
 import { EnquiryDialog } from "@/components/enquiry-dialog";
 import { tierById } from "@/data/membership";
+import { relativeTime } from "@/lib/format";
+import type { Review } from "@/data/types";
 
 export const Route = createFileRoute("/dealer/$id")({
   loader: async ({ params }) => {
@@ -127,12 +130,3 @@ function DealerDetail() {
               <p className="mt-3 text-[11px] font-bold uppercase tracking-widest text-brand">
                 {s.priceFromText}
               </p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <EnquiryDialog open={enquiryOpen} onOpenChange={setEnquiryOpen} dealer={dealer} />
-    </div>
-  );
-}

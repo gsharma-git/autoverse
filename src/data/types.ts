@@ -74,6 +74,17 @@ export interface MembershipTier {
   perks: string[];
 }
 
+export interface Review {
+  id: string;
+  dealerId: string;
+  customerName: string;
+  rating: number; // 1–5
+  title: string;
+  body: string;
+  createdAt: number; // unix ms
+  verified: boolean;
+}
+
 export interface Enquiry {
   id: string;
   customerId: string;
@@ -106,19 +117,4 @@ export interface CustomerProfile {
   pincode: string;
   vehicle: string;
   favouriteProductIds: string[];
-  favouriteDealerIds: string[];
-}
-
-export interface VendorProfile {
-  id: string;
-  dealerId: string;
-  ownerName: string;
-  email: string;
-  status: "pending" | "verified" | "suspended";
-}
-
-export interface AdminProfile {
-  id: string;
-  name: string;
-  email: string;
-}
+  favouriteDealerIds: str
