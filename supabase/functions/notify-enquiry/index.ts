@@ -85,6 +85,16 @@ serve(async (req) => {
     }
 
     const dealerName = dealer?.name ?? "the dealership";
+
+    // ── Resolve customer email from auth.users ────────────────────────────────
+    // The enquiries table has customer_id (auth UID) but no customer_email column.
+    // We look up the email using the service-role admin client.
+    let customerEmail: string | undefined;
+    if (enquiry.customer_id) {
+      const { data: { user } } = await supabase.auth.admin.getUserById(enquiry.customer_id);
+      customerEmail = user?.email ?? undefined;
+    }
+
     const promises: Promise<void>[] = [];
 
     // ── 1. Vendor alert ───────────────────────────────────────────────────────
@@ -126,7 +136,7 @@ serve(async (req) => {
     }
 
     // ── 2. Customer confirmation ──────────────────────────────────────────────
-    if (enquiry.customer_email) {
+    if (customerEmail) {
       const customerHtml = `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto">
           <div style="background:#111827;padding:24px 32px;border-radius:12px 12px 0 0">
@@ -155,7 +165,7 @@ serve(async (req) => {
       `;
       promises.push(
         sendEmail(
-          enquiry.customer_email,
+          customerEmail,
           `Your enquiry for ${productName} has been sent`,
           customerHtml,
         )

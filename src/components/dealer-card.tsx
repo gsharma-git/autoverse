@@ -31,6 +31,17 @@ export function DealerCard({ dealer }: { dealer: Dealer }) {
 
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all hover:shadow-[var(--shadow-elevated)]">
+      {dealer.storefrontImage && (
+        <Link to="/dealer/$id" params={{ id: dealer.id }}>
+          <div className="relative h-32 overflow-hidden bg-steel">
+            <img
+              src={dealer.storefrontImage}
+              alt={dealer.name}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        </Link>
+      )}
       <div className="flex items-start gap-4 p-5">
         <div className="grid size-14 shrink-0 place-items-center rounded-xl bg-ink text-background">
           <span className="font-display text-sm font-bold">{dealer.logoInitials}</span>

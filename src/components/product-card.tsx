@@ -21,9 +21,17 @@ export function ProductCard({ product }: { product: Product }) {
         params={{ id: product.id }}
         className="relative block aspect-square overflow-hidden bg-steel"
       >
-        <div className="absolute inset-0 grid place-items-center">
-          <ProductGlyph category={product.category} colour={product.colour} />
-        </div>
+        {product.images[0] ? (
+          <img
+            src={product.images[0]}
+            alt={product.name}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 grid place-items-center">
+            <ProductGlyph category={product.category} colour={product.colour} />
+          </div>
+        )}
         {product.trending && (
           <span className="absolute left-3 top-3 rounded-full bg-ink px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-background">
             Trending

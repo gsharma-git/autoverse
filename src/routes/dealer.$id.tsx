@@ -79,6 +79,12 @@ function DealerDetail() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <section className="border-b border-border bg-steel py-12">
+        {dealer.storefrontImage && (
+          <div className="relative h-56 overflow-hidden sm:h-72">
+            <img src={dealer.storefrontImage} alt={dealer.name} className="h-full w-full object-cover" />
+            <div className="absolute inset-0 bg-ink/50" />
+          </div>
+        )}
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Link to="/dealers" className="inline-flex items-center gap-1 text-xs font-bold uppercase tracking-widest text-muted-foreground hover:text-brand">
             <ArrowLeft className="size-3" /> Back to dealers

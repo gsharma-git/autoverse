@@ -22,13 +22,13 @@ export const Route = createFileRoute("/product/$id")({
   head: ({ loaderData, params }) => ({
     meta: loaderData
       ? [
-          { title: `${loaderData.product.name} · ${loaderData.product.brand} · AutoVerse` },
+          { title: `${loaderData.product.name} · ${loaderData.product.brandName ?? loaderData.product.brandId} · AutoVerse` },
           { name: "description", content: loaderData.product.tagline },
           { property: "og:title", content: `${loaderData.product.name} · AutoVerse` },
           { property: "og:description", content: loaderData.product.tagline },
           { property: "og:url", content: `https://autoverse.in/product/${params.id}` },
           { property: "og:type", content: "product" },
-          ...(loaderData.product.image ? [{ property: "og:image", content: loaderData.product.image }] : []),
+          ...(loaderData.product.images[0] ? [{ property: "og:image", content: loaderData.product.images[0] }] : []),
         ]
       : [{ title: "Product · AutoVerse" }, { name: "robots", content: "noindex" }],
   }),
@@ -56,11 +56,11 @@ function ProductPage() {
     description: product.tagline,
     brand: { "@type": "Brand", name: brand.name },
     category: product.category === "tyre" ? "Tyre" : "Alloy Wheel",
-    image: product.image ?? undefined,
+    image: product.images[0] ?? undefined,
     offers: {
       "@type": "AggregateOffer",
       priceCurrency: "INR",
-      lowPrice: product.priceFrom,
+      lowPrice: product.price,
       offerCount: dealers.length,
       availability: dealers.length > 0
         ? "https://schema.org/InStock"
@@ -84,11 +84,15 @@ function ProductPage() {
           <div className="aspect-square overflow-hidden rounded-3xl bg-steel">
             <ProductVisual product={product} />
           </div>
-          <div className="mt-4 grid grid-cols-4 gap-3">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="aspect-square rounded-xl bg-steel/70" />
-            ))}
-          </div>
+          {product.images.length > 1 && (
+            <div className="mt-4 grid grid-cols-4 gap-3">
+              {product.images.slice(0, 4).map((url, i) => (
+                <div key={i} className="aspect-square overflow-hidden rounded-xl bg-steel/70">
+                  <img src={url} alt={`${product.name} view ${i + 1}`} className="h-full w-full object-cover" />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div>
@@ -221,6 +225,15 @@ function RelatedProducts({ product }: { product: Product }) {
 
 function ProductVisual({ product }: { product: Product }) {
   const isAlloy = product.category === "alloy";
+  if (product.images[0]) {
+    return (
+      <img
+        src={product.images[0]}
+        alt={product.name}
+        className="h-full w-full object-cover"
+      />
+    );
+  }
   return (
     <div className="grid h-full place-items-center p-8">
       <svg viewBox="0 0 400 400" className="h-full w-full">
