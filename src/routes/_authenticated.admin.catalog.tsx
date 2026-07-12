@@ -31,6 +31,7 @@ import {
 import { toast } from "sonner";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { formatINR } from "@/lib/format";
+import { ImageUpload } from "@/components/image-upload";
 
 export const Route = createFileRoute("/_authenticated/admin/catalog")({
   component: AdminCatalog,
@@ -65,6 +66,7 @@ interface CatalogProduct {
   tagline: string;
   featured: boolean;
   trending: boolean;
+  images: string[];
 }
 
 interface CatalogDealer {
@@ -78,6 +80,7 @@ interface CatalogDealer {
   whatsapp: string;
   hours_text: string;
   logo_initials: string;
+  storefront_image?: string;
   membership: "free" | "silver" | "gold" | "diamond";
   rating: number;
   since: number;
@@ -529,7 +532,7 @@ function ProductsTab() {
   async function load() {
     setLoading(true);
     const [pRes, bRes] = await Promise.all([
-      supabase.from("products").select("id,name,slug,category,brand_id,price,size,tagline,featured,trending").order("name"),
+      supabase.from("products").select("id,name,slug,category,brand_id,price,size,tagline,featured,trending,images").order("name"),
       supabase.from("brands").select("*").order("name"),
     ]);
     if (pRes.error) toast.error(pRes.error.message);
@@ -585,6 +588,7 @@ function ProductsTab() {
           <table className="min-w-full text-sm">
             <thead className="border-b border-border text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               <tr>
+                <th className="py-2 pr-3">Image</th>
                 <th className="py-2 pr-3">Name</th>
                 <th className="py-2 pr-3">Cat.</th>
                 <th className="py-2 pr-3">Brand</th>
@@ -598,6 +602,13 @@ function ProductsTab() {
             <tbody className="divide-y divide-border">
               {filtered.map((p) => (
                 <tr key={p.id}>
+                  <td className="py-3 pr-3">
+                    {p.images?.[0] ? (
+                      <img src={p.images[0]} alt={p.name} className="size-10 rounded-lg object-cover border border-border" />
+                    ) : (
+                      <div className="size-10 rounded-lg bg-secondary flex items-center justify-center text-[10px] text-muted-foreground">No img</div>
+                    )}
+                  </td>
                   <td className="py-3 pr-3 font-semibold">{p.name}</td>
                   <td className="py-3 pr-3 capitalize text-xs">{p.category}</td>
                   <td className="py-3 pr-3 text-xs">{brandName(p.brand_id)}</td>
@@ -632,7 +643,7 @@ function ProductsTab() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={8} className="py-8 text-center text-muted-foreground">No products found.</td></tr>
+                <tr><td colSpan={9} className="py-8 text-center text-muted-foreground">No products found.</td></tr>
               )}
             </tbody>
           </table>
@@ -685,6 +696,7 @@ function ProductDialog({
   const [tagline, setTagline] = useState(product?.tagline ?? "");
   const [featured, setFeatured] = useState(product?.featured ?? false);
   const [trending, setTrending] = useState(product?.trending ?? false);
+  const [imageUrl, setImageUrl] = useState(product?.images?.[0] ?? "");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -696,6 +708,7 @@ function ProductDialog({
     setTagline(product?.tagline ?? "");
     setFeatured(product?.featured ?? false);
     setTrending(product?.trending ?? false);
+    setImageUrl(product?.images?.[0] ?? "");
   }, [product, open]);
 
   async function save() {
@@ -714,6 +727,7 @@ function ProductDialog({
       tagline: tagline.trim(),
       featured,
       trending,
+      images: imageUrl ? [imageUrl] : (product?.images ?? []),
     };
     if (product) {
       const { error } = await supabase.from("products").update(payload).eq("id", product.id);
@@ -737,6 +751,16 @@ function ProductDialog({
           <DialogTitle>{product ? "Edit product" : "Add product"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
+          <div>
+            <label className="mb-1 block text-xs font-medium">Product image</label>
+            <ImageUpload
+              value={imageUrl}
+              onChange={setImageUrl}
+              folder="products"
+              label="Upload product photo"
+              className="h-36 w-full"
+            />
+          </div>
           <div>
             <label className="mb-1 block text-xs font-medium">Name</label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. MRF ZLX 185/65 R15" />
@@ -814,7 +838,7 @@ function DealersTab() {
     setLoading(true);
     const { data, error } = await supabase
       .from("dealers")
-      .select("id,name,slug,city,pincode,address,phone,whatsapp,hours_text,logo_initials,membership,rating,since")
+      .select("id,name,slug,city,pincode,address,phone,whatsapp,hours_text,logo_initials,storefront_image,membership,rating,since")
       .order("name");
     if (error) toast.error(error.message);
     else setDealers(data ?? []);
@@ -865,6 +889,7 @@ function DealersTab() {
           <table className="min-w-full text-sm">
             <thead className="border-b border-border text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               <tr>
+                <th className="py-2 pr-3">Photo</th>
                 <th className="py-2 pr-3">Name</th>
                 <th className="py-2 pr-3">City</th>
                 <th className="py-2 pr-3">Pincode</th>
@@ -877,6 +902,15 @@ function DealersTab() {
             <tbody className="divide-y divide-border">
               {filtered.map((d) => (
                 <tr key={d.id}>
+                  <td className="py-3 pr-3">
+                    {d.storefront_image ? (
+                      <img src={d.storefront_image} alt={d.name} className="size-10 rounded-lg object-cover border border-border" />
+                    ) : (
+                      <div className="size-10 rounded-lg bg-ink text-background flex items-center justify-center text-xs font-bold">
+                        {d.logo_initials || d.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </td>
                   <td className="py-3 pr-3">
                     <div className="font-semibold">{d.name}</div>
                     <div className="text-[10px] text-muted-foreground font-mono">{d.id}</div>
@@ -903,7 +937,7 @@ function DealersTab() {
                 </tr>
               ))}
               {filtered.length === 0 && (
-                <tr><td colSpan={7} className="py-8 text-center text-muted-foreground">No dealers found.</td></tr>
+                <tr><td colSpan={8} className="py-8 text-center text-muted-foreground">No dealers found.</td></tr>
               )}
             </tbody>
           </table>
@@ -956,6 +990,7 @@ function DealerDialog({
   const [logoInitials, setLogoInitials] = useState(dealer?.logo_initials ?? "");
   const [membership, setMembership] = useState<CatalogDealer["membership"]>(dealer?.membership ?? "free");
   const [since, setSince] = useState(String(dealer?.since ?? new Date().getFullYear()));
+  const [storefrontImage, setStorefrontImage] = useState(dealer?.storefront_image ?? "");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -969,6 +1004,7 @@ function DealerDialog({
     setLogoInitials(dealer?.logo_initials ?? "");
     setMembership(dealer?.membership ?? "free");
     setSince(String(dealer?.since ?? new Date().getFullYear()));
+    setStorefrontImage(dealer?.storefront_image ?? "");
   }, [dealer, open]);
 
   async function save() {
@@ -988,6 +1024,7 @@ function DealerDialog({
       whatsapp: whatsapp.trim(),
       hours_text: hoursText.trim(),
       logo_initials: logoInitials.trim() || name.trim().slice(0, 2).toUpperCase(),
+      storefront_image: storefrontImage || null,
       membership,
       since: sinceYear,
     };
@@ -1011,6 +1048,16 @@ function DealerDialog({
           <DialogTitle>{dealer ? "Edit dealer" : "Add dealer"}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
+          <div>
+            <label className="mb-1 block text-xs font-medium">Storefront photo</label>
+            <ImageUpload
+              value={storefrontImage}
+              onChange={setStorefrontImage}
+              folder="dealers"
+              label="Upload storefront photo"
+              className="h-36 w-full"
+            />
+          </div>
           <div>
             <label className="mb-1 block text-xs font-medium">Shop name</label>
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Delhi Tyres & Alloys" />
