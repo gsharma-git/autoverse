@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet } from "@tanstack/react-router";
-import { LayoutDashboard, Users, Package, Inbox, Megaphone, FileText, BarChart3, Settings } from "lucide-react";
+import { LayoutDashboard, Users, Package, Inbox, Megaphone, FileText, BarChart3, Settings, BookOpen } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { RoleMismatch } from "./_authenticated.account";
@@ -12,6 +12,7 @@ const nav = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/vendors", label: "Vendors", icon: Users },
   { to: "/admin/products", label: "Products", icon: Package },
+  { to: "/admin/catalog", label: "Catalog", icon: BookOpen },
   { to: "/admin/enquiries", label: "Enquiries", icon: Inbox },
   { to: "/admin/banners", label: "Banners", icon: Megaphone },
   { to: "/admin/cms", label: "CMS", icon: FileText },

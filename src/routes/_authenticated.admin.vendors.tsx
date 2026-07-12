@@ -11,7 +11,8 @@ export const Route = createFileRoute("/_authenticated/admin/vendors")({
 
 function AdminVendors() {
   const vendors = useStore((s) => s.vendors);
-  const pendingServices = useStore((s) => s.vendorServices.filter((v) => v.status === "pending"));
+  const vendorServices = useStore((s) => s.vendorServices);
+  const pendingServices = vendorServices.filter((v) => v.status === "pending");
 
   function vendorLabel(id: string) {
     const v = vendors.find((v) => v.id === id);

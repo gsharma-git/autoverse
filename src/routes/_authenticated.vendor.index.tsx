@@ -33,7 +33,8 @@ function VendorDashboard() {
   });
   const { data: allProducts = [] } = useQuery({ queryKey: ["products"], queryFn: () => fetchProducts(), staleTime: 5 * 60 * 1000 });
   const productMap = Object.fromEntries(allProducts.map((p) => [p.id, p]));
-  const enquiries = useStore((s) => s.enquiries.filter((e) => e.dealerId === dealer?.id));
+  const allEnquiries = useStore((s) => s.enquiries);
+  const enquiries = allEnquiries.filter((e) => e.dealerId === dealer?.id);
 
   if (!vendor || !dealer) {
     return (

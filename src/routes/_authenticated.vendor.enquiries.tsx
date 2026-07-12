@@ -13,7 +13,8 @@ export const Route = createFileRoute("/_authenticated/vendor/enquiries")({
 function VendorEnquiries() {
   const { session } = useAuth();
   const dealer = session ? dealerFromVendor(session.userId) : undefined;
-  const enquiries = useStore((s) => s.enquiries.filter((e) => e.dealerId === dealer?.id));
+  const allEnquiries = useStore((s) => s.enquiries);
+  const enquiries = allEnquiries.filter((e) => e.dealerId === dealer?.id);
   const { data: allProducts = [] } = useQuery({ queryKey: ["products"], queryFn: () => fetchProducts(), staleTime: 5 * 60 * 1000 });
   const { data: allServices = [] } = useQuery({ queryKey: ["services"], queryFn: fetchServices, staleTime: 5 * 60 * 1000 });
   const productMap = Object.fromEntries(allProducts.map((p) => [p.id, p]));

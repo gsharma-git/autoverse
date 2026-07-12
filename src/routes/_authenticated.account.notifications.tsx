@@ -10,7 +10,8 @@ export const Route = createFileRoute("/_authenticated/account/notifications")({
 
 function Notifications() {
   const { session } = useAuth();
-  const items = useStore((s) => s.notifications.filter((n) => n.userId === session?.userId));
+  const notifications = useStore((s) => s.notifications);
+  const items = notifications.filter((n) => n.userId === session?.userId);
   return (
     <div className="rounded-2xl border border-border bg-card p-6">
       <h2 className="font-display text-lg font-bold uppercase tracking-tight">Notifications</h2>

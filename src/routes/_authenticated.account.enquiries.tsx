@@ -11,7 +11,8 @@ export const Route = createFileRoute("/_authenticated/account/enquiries")({
 
 function MyEnquiries() {
   const { session } = useAuth();
-  const enquiries = useStore((s) => s.enquiries.filter((e) => e.customerId === session?.userId));
+  const allEnquiries = useStore((s) => s.enquiries);
+  const enquiries = allEnquiries.filter((e) => e.customerId === session?.userId);
   const { data: allProducts = [] } = useQuery({ queryKey: ["products"], queryFn: () => fetchProducts(), staleTime: 5 * 60 * 1000 });
   const { data: allDealers = [] } = useQuery({ queryKey: ["dealers"], queryFn: fetchDealers, staleTime: 5 * 60 * 1000 });
   const { data: allServices = [] } = useQuery({ queryKey: ["services"], queryFn: fetchServices, staleTime: 5 * 60 * 1000 });
