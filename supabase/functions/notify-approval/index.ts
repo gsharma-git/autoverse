@@ -16,6 +16,9 @@ const SITE_URL = Deno.env.get("SITE_URL") ?? "https://autoverse.in";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
+// Update to "AutoVerse <notifications@yourdomain.com>" once domain is verified in Resend
+const FROM_EMAIL = "AutoVerse <onboarding@resend.dev>";
+
 serve(async (req) => {
   try {
     const body = await req.json();
@@ -95,7 +98,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        from: "AutoVerse <notifications@autoverse.in>",
+        from: FROM_EMAIL,
         to: [record.email],
         subject: `${dealerName} is now live on AutoVerse`,
         html,
