@@ -74,6 +74,17 @@ export interface MembershipTier {
   perks: string[];
 }
 
+export interface Review {
+  id: string;
+  dealerId: string;
+  customerName: string;
+  rating: number; // 1–5
+  title: string;
+  body: string;
+  createdAt: number; // unix ms
+  verified: boolean;
+}
+
 export interface Enquiry {
   id: string;
   customerId: string;
@@ -118,4 +129,7 @@ export interface VendorProfile {
 }
 
 export interface AdminProfile {
-  
+  id: string;
+  name: string;
+  email: string;
+}

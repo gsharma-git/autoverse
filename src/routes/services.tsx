@@ -50,4 +50,12 @@ function ServicesPage() {
                 {s.priceFromText}
               </span>
               <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-   
+                {s.applicableVehicles.join(" · ")}
+              </span>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}

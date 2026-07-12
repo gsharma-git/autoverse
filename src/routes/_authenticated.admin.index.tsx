@@ -40,4 +40,9 @@ function AdminDashboard() {
 
 function StatCard({ label, value, accent }: { label: string; value: number; accent?: boolean }) {
   return (
-    <div classNa
+    <div className={`rounded-2xl border p-5 ${accent ? "border-brand bg-brand/5" : "border-border bg-card"}`}>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
+      <p className="mt-2 font-display text-3xl font-bold">{value}</p>
+    </div>
+  );
+}

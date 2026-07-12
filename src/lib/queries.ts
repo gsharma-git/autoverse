@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { Product, Dealer, Service, Brand } from "@/data/types";
+import type { Product, Dealer, Service, Brand, Review } from "@/data/types";
 
 // ── Mappers ────────────────────────────────────────────────────────────────
 
@@ -175,4 +175,66 @@ export async function fetchBrands(category?: "tyre" | "alloy"): Promise<Brand[]>
   const { data, error } = await (q as any).order("name");
   if (error) throw error;
   return (data ?? []).map(mapBrand);
+}
+
+// ── Reviews ────────────────────────────────────────────────────────────────
+
+export async function fetchReviewsForDealer(dealerId: string): Promise<Review[]> {
+  // Try the dealer_reviews table (Phase 3+). Falls back to seeded demo data if
+  // the table doesn't exist yet or returns nothing.
+  const { data, error } = await supabase
+    .from("dealer_reviews" as any)
+    .select("*")
+    .eq("dealer_id", dealerId)
+    .order("created_at", { ascending: false });
+
+  if (!error && data && (data as any[]).length > 0) {
+    return (data as any[]).map((row) => ({
+      id: row.id,
+      dealerId: row.dealer_id,
+      customerName: row.customer_name,
+      rating: Number(row.rating),
+      title: row.title,
+      body: row.body,
+      createdAt: new Date(row.created_at).getTime(),
+      verified: row.verified ?? false,
+    }));
+  }
+
+  // Fall back to seeded mock reviews
+  const { reviewsForDealer } = await import("@/data/reviews");
+  return reviewsForDealer(dealerId);
+}
+
+// ── Related Products ───────────────────────────────────────────────────────
+
+export async function fetchRelatedProducts(
+  currentProductId: string,
+  category: "tyre" | "alloy",
+  brandId: string,
+): Promise<Product[]> {
+  // Same brand first
+  const { data: sameBrand } = await supabase
+    .from("products")
+    .select("*, brands(name), product_dealers(dealer_id)")
+    .eq("category", category)
+    .eq("brand_id", brandId)
+    .neq("id", currentProductId)
+    .limit(4);
+
+  if ((sameBrand ?? []).length >= 4) {
+    return (sameBrand ?? []).map(mapProduct);
+  }
+
+  // Fill remaining slots from same category, different brand
+  const needed = 4 - (sameBrand ?? []).length;
+  const { data: others } = await supabase
+    .from("products")
+    .select("*, brands(name), product_dealers(dealer_id)")
+    .eq("category", category)
+    .neq("brand_id", brandId)
+    .neq("id", currentProductId)
+    .limit(needed);
+
+  return [...(sameBrand ?? []), ...(others ?? [])].map(mapProduct);
 }

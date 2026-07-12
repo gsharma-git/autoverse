@@ -56,4 +56,17 @@ function VendorEnquiries() {
                     Mark contacted
                   </Button>
                 )}
-                {e.s
+                {e.status !== "closed" && (
+                  <Button size="sm" variant="ghost" onClick={() => updateEnquiryStatus(e.id, "closed")} className="rounded-full">
+                    Close
+                  </Button>
+                )}
+              </div>
+            </div>
+          );
+        })}
+        {enquiries.length === 0 && <p className="text-sm text-muted-foreground">No enquiries yet.</p>}
+      </div>
+    </div>
+  );
+}

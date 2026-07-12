@@ -314,6 +314,15 @@ export async function createEnquiry(input: {
   };
   const { data, error } = await supabase.from("enquiries").insert(insert).select().single();
   if (error) throw error;
+
+  // Fire-and-forget: email notification via Edge Function.
+  // The SQL trigger (notify_enquiry_webhook) handles this server-side when pg_net is
+  // configured.  This client-side invoke is a reliable fallback for environments where
+  // pg_net is not yet set up.  If both are active, disable one to avoid duplicate emails.
+  supabase.functions
+    .invoke("notify-enquiry", { body: { type: "INSERT", record: data } })
+    .catch(() => { /* non-fatal — enquiry was already saved */ });
+
   return mapEnquiry(data);
 }
 
@@ -455,6 +464,44 @@ export async function createVendorProduct(input: {
   if (error) throw error;
 }
 
+export async function updateVendorProduct(
+  id: string,
+  input: {
+    name: string;
+    category: "tyre" | "alloy";
+    brand: string;
+    size: string;
+    price: number;
+    image?: string | null;
+  },
+) {
+  const { error } = await supabase
+    .from("vendor_products")
+    .update({
+      name: input.name,
+      category: input.category,
+      brand: input.brand,
+      size: input.size,
+      price: input.price,
+      image: input.image ?? null,
+      status: "pending", // re-submit for approval on edit
+    })
+    .eq("id", id);
+  if (error) throw error;
+}
+
+export async function uploadVendorImage(file: File): Promise<string> {
+  if (!state.currentUserId) throw new Error("Not signed in");
+  const ext = file.name.split(".").pop() ?? "jpg";
+  const path = `${state.currentUserId}/${Date.now()}.${ext}`;
+  const { error } = await supabase.storage
+    .from("vendor-images")
+    .upload(path, file, { upsert: true });
+  if (error) throw error;
+  const { data } = supabase.storage.from("vendor-images").getPublicUrl(path);
+  return data.publicUrl;
+}
+
 export async function deleteVendorProduct(id: string) {
   const { error } = await supabase.from("vendor_products").delete().eq("id", id);
   if (error) throw error;
@@ -480,6 +527,22 @@ export async function createVendorService(input: {
   if (error) throw error;
 }
 
+export async function updateVendorService(
+  id: string,
+  input: { name: string; description: string; priceFromText: string },
+) {
+  const { error } = await supabase
+    .from("vendor_services")
+    .update({
+      name: input.name,
+      description: input.description,
+      price_from_text: input.priceFromText,
+      status: "pending", // re-submit for approval on edit
+    })
+    .eq("id", id);
+  if (error) throw error;
+}
+
 export async function deleteVendorService(id: string) {
   const { error } = await supabase.from("vendor_services").delete().eq("id", id);
   if (error) throw error;
@@ -499,4 +562,31 @@ export function dealerFromVendor(vendorAuthId: string) {
   const vendor = state.vendors.find((v) => v.id === vendorAuthId);
   if (!vendor) return undefined;
   return dealers.find((d) => d.id === vendor.dealerId);
+}
+
+export async function upgradeMembership(
+  vendorId: string,
+  dealerId: string,
+  tier: "free" | "silver" | "gold" | "diamond",
+) {
+  // Update vendor record (membership tier intent)
+  const { error: vErr } = await supabase
+    .from("vendors")
+    .update({ membership: tier } as never)
+    .eq("id", vendorId);
+  if (vErr) throw vErr;
+
+  // Update dealer record so it reflects in public profiles
+  const { error: dErr } = await supabase
+    .from("dealers")
+    .update({ membership: tier } as never)
+    .eq("id", dealerId);
+  if (dErr) throw dErr;
+
+  // Optimistic local update
+  set({
+    vendors: state.vendors.map((v) =>
+      v.id === vendorId ? { ...v, membership: tier } : v,
+    ),
+  });
 }

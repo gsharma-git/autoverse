@@ -105,4 +105,60 @@ export const services: Service[] = [
   },
   {
     id: "insurance",
- 
+    slug: "insurance",
+    name: "Vehicle Insurance",
+    description:
+      "Compare and buy motor insurance via AutoVerse partner dealers. Comprehensive, third-party, and add-on covers.",
+    applicableVehicles: ["All"],
+    icon: "shield-check",
+    priceFromText: "Quoted on enquiry",
+  },
+  {
+    id: "ev-charging",
+    slug: "ev-charging",
+    name: "EV Charging Point Locator",
+    description:
+      "Find verified EV charging stations near you through the AutoVerse dealer network.",
+    applicableVehicles: ["Electric Vehicles"],
+    icon: "plug-zap",
+    priceFromText: "Free to locate",
+  },
+  {
+    id: "tractor-tyre",
+    slug: "tractor-tyre",
+    name: "Tractor & EV Tyres",
+    description:
+      "Specialist fitment for tractor tyres, agricultural tyres, and EV-specific tyre variants from verified dealers.",
+    applicableVehicles: ["Tractor", "Electric Vehicles"],
+    icon: "tractor",
+    priceFromText: "Quoted per fitment",
+  },
+  {
+    id: "bajaj-card",
+    slug: "bajaj-card",
+    name: "Bajaj Finserv EMI Card",
+    description:
+      "Buy tyres and alloys on easy EMI through the Bajaj Finserv card, accepted at AutoVerse partner dealers.",
+    applicableVehicles: ["All"],
+    icon: "credit-card",
+    priceFromText: "0% EMI available",
+  },
+  {
+    id: "highway-hotels",
+    slug: "highway-hotels",
+    name: "Highway Hotels",
+    description:
+      "Rest stops and highway hospitality partners near AutoVerse dealers. Useful for long-haul drivers.",
+    applicableVehicles: ["All"],
+    icon: "building-2",
+    priceFromText: "Quoted on enquiry",
+  },
+];
+
+export function serviceById(id: string) {
+  return services.find((s) => s.id === id);
+}
+
+export function serviceBySlug(slug: string) {
+  return services.find((s) => s.slug === slug);
+}

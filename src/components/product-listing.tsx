@@ -183,4 +183,20 @@ export function ProductListing({ category, initialPincode, initialVehicle, initi
             </div>
           ) : filtered.length === 0 ? (
             <div className="grid place-items-center rounded-2xl border border-dashed border-border p-16 text-center">
-              <p className="font-d
+              <p className="font-display text-xl font-bold italic uppercase">No matches</p>
+              <p className="mt-2 max-w-sm text-sm text-muted-foreground">
+                Adjust brand, size or price range to see more results from our dealer network.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {filtered.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

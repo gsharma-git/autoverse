@@ -148,4 +148,6 @@ function RootComponent() {
         </div>
         <Toaster />
       </AuthProvider>
-    </QueryClientProvide
+    </QueryClientProvider>
+  );
+}

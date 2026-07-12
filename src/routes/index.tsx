@@ -8,6 +8,22 @@ import { fetchProducts, fetchDealers, fetchServices, fetchBrands } from "@/lib/q
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "AutoVerse — India's Verified Tyre, Alloy & Auto Services Marketplace" },
+      {
+        name: "description",
+        content:
+          "Search tyres, alloys and auto services from verified dealers near you. Filter by vehicle, brand, size or pincode across 120+ Indian cities. Enquire in one tap.",
+      },
+      { property: "og:title", content: "AutoVerse — India's Verified Auto Parts & Services Marketplace" },
+      {
+        property: "og:description",
+        content: "Find the right tyre or alloy for your ride, sourced from verified local dealers. Enquiry-first, no online checkout.",
+      },
+      { property: "og:url", content: "https://autoverse.in" },
+    ],
+  }),
   component: Index,
 });
 
@@ -37,7 +53,7 @@ function Index() {
             <span className="inline-block rounded-full border border-ink/10 bg-background px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-brand">
               Verified · Enquiry-first · Local
             </span>
-            <h1 className="mt-6 font-display text-5xl font-bold uppercase italic leading-none tracking-tight text-foreground md:text-6xl">
+            <h1 className="mt-6 font-display text-4xl font-bold uppercase italic leading-none tracking-tight text-foreground sm:text-5xl md:text-6xl">
               Grip the road.<br />
               Own the style.
             </h1>
@@ -219,4 +235,18 @@ function Index() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Button asChild size="lg" className="rounded-full bg-ink text-background hover:bg-ink/90">
-                <Link to="/vendor/register">Register as dealer</Lin
+                <Link to="/vendor/register">Register as dealer</Link>
+              </Button>
+              <Button asChild size="lg" variant="outline" className="rounded-full border-brand-foreground/40 bg-transparent text-brand-foreground hover:bg-brand-foreground/10">
+                <Link to="/membership">Compare plans</Link>
+              </Button>
+            </div>
+          </div>
+          <span className="pointer-events-none absolute -bottom-12 -right-4 select-none font-display text-[10rem] font-bold italic leading-none tracking-tighter text-brand-foreground/10 md:text-[14rem]">
+            HUB
+          </span>
+        </div>
+      </section>
+    </div>
+  );
+}

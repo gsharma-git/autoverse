@@ -43,4 +43,19 @@ function AdminEnquiries() {
                   <td className="py-3 pr-3">{e.customerName}</td>
                   <td className="py-3 pr-3">{p?.name ?? s?.name ?? "General"}</td>
                   <td className="py-3 pr-3">{d?.name ?? "—"}</td>
-                  <td className="py-3 pr-3 text-muted-foreg
+                  <td className="py-3 pr-3 text-muted-foreground">{relativeTime(e.createdAt)}</td>
+                  <td className="py-3 pr-3">
+                    <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest">{e.status}</span>
+                  </td>
+                  <td className="py-3">
+                    <Button size="sm" variant="ghost" onClick={() => updateEnquiryStatus(e.id, "closed")} className="rounded-full text-xs">Close</Button>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

@@ -35,4 +35,20 @@ function MyEnquiries() {
                     {e.status}
                   </span>
                   <p className="font-semibold">
-                    {p?.
+                    {p?.name ?? s?.name ?? "General enquiry"}
+                  </p>
+                  <span className="text-xs text-muted-foreground">· {relativeTime(e.createdAt)}</span>
+                </div>
+                {d && <p className="mt-1 text-xs text-muted-foreground">Sent to {d.name}</p>}
+                <p className="mt-2 text-sm text-muted-foreground">{e.message}</p>
+              </div>
+            </div>
+          );
+        })}
+        {enquiries.length === 0 && (
+          <p className="py-6 text-sm text-muted-foreground">No enquiries yet.</p>
+        )}
+      </div>
+    </div>
+  );
+}
