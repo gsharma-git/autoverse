@@ -1,6 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  type CatalogBrand,
+  type CatalogService,
+  type CatalogProduct,
+  type CatalogDealer,
+  fetchCatalogBrands,
+  insertBrand,
+  updateBrand,
+  deleteBrand,
+  fetchCatalogServices,
+  insertService,
+  updateService,
+  deleteService,
+  fetchCatalogProducts,
+  insertProduct,
+  updateProduct,
+  toggleProductFlag,
+  deleteProduct,
+  fetchCatalogDealers,
+  insertDealer,
+  updateDealer,
+  deleteDealer,
+} from "@/services/catalog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -36,55 +58,6 @@ import { ImageUpload } from "@/components/image-upload";
 export const Route = createFileRoute("/_authenticated/admin/catalog")({
   component: AdminCatalog,
 });
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface CatalogBrand {
-  id: string;
-  name: string;
-  category: "tyre" | "alloy";
-}
-
-interface CatalogService {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  applicable_vehicles: string[];
-  icon: string;
-  price_from_text: string;
-}
-
-interface CatalogProduct {
-  id: string;
-  name: string;
-  slug: string;
-  category: "tyre" | "alloy";
-  brand_id: string;
-  price: number;
-  size: string;
-  tagline: string;
-  featured: boolean;
-  trending: boolean;
-  images: string[];
-}
-
-interface CatalogDealer {
-  id: string;
-  name: string;
-  slug: string;
-  city: string;
-  pincode: string;
-  address: string;
-  phone: string;
-  whatsapp: string;
-  hours_text: string;
-  logo_initials: string;
-  storefront_image?: string;
-  membership: "free" | "silver" | "gold" | "diamond";
-  rating: number;
-  since: number;
-}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -133,9 +106,11 @@ function BrandsTab() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase.from("brands").select("*").order("name");
-    if (error) toast.error(error.message);
-    else setBrands(data ?? []);
+    try {
+      setBrands(await fetchCatalogBrands());
+    } catch (err: any) {
+      toast.error(err?.message ?? "Failed to load brands");
+    }
     setLoading(false);
   }
 
@@ -146,11 +121,14 @@ function BrandsTab() {
   );
 
   async function handleDelete(brand: CatalogBrand) {
-    const { error } = await supabase.from("brands").delete().eq("id", brand.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success(`"${brand.name}" deleted`);
-    setDeleteTarget(null);
-    load();
+    try {
+      await deleteBrand(brand.id);
+      toast.success(`"${brand.name}" deleted`);
+      setDeleteTarget(null);
+      load();
+    } catch (err: any) {
+      toast.error(err?.message ?? "Delete failed");
+    }
   }
 
   return (
@@ -267,17 +245,18 @@ function BrandDialog({
   async function save() {
     if (!name.trim()) { toast.error("Name is required"); return; }
     setSaving(true);
-    if (brand) {
-      const { error } = await supabase.from("brands").update({ name: name.trim(), category }).eq("id", brand.id);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    } else {
-      const id = slugify(name.trim());
-      const { error } = await supabase.from("brands").insert({ id, name: name.trim(), category });
-      if (error) { toast.error(error.message); setSaving(false); return; }
+    try {
+      if (brand) {
+        await updateBrand(brand.id, name.trim(), category);
+      } else {
+        await insertBrand(slugify(name.trim()), name.trim(), category);
+      }
+      toast.success(brand ? "Brand updated" : "Brand added");
+      onSaved();
+    } catch (err: any) {
+      toast.error(err?.message ?? "Save failed");
     }
-    toast.success(brand ? "Brand updated" : "Brand added");
     setSaving(false);
-    onSaved();
   }
 
   return (
@@ -325,9 +304,11 @@ function ServicesTab() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase.from("services").select("*").order("name");
-    if (error) toast.error(error.message);
-    else setServices(data ?? []);
+    try {
+      setServices(await fetchCatalogServices());
+    } catch (err: any) {
+      toast.error(err?.message ?? "Failed to load services");
+    }
     setLoading(false);
   }
 
@@ -338,11 +319,14 @@ function ServicesTab() {
   );
 
   async function handleDelete(svc: CatalogService) {
-    const { error } = await supabase.from("services").delete().eq("id", svc.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success(`"${svc.name}" deleted`);
-    setDeleteTarget(null);
-    load();
+    try {
+      await deleteService(svc.id);
+      toast.success(`"${svc.name}" deleted`);
+      setDeleteTarget(null);
+      load();
+    } catch (err: any) {
+      toast.error(err?.message ?? "Delete failed");
+    }
   }
 
   return (
@@ -464,17 +448,18 @@ function ServiceDialog({
       price_from_text: priceFromText.trim(),
       applicable_vehicles: vehicles.split(",").map((v) => v.trim()).filter(Boolean),
     };
-    if (service) {
-      const { error } = await supabase.from("services").update(payload).eq("id", service.id);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    } else {
-      const id = slugify(name.trim());
-      const { error } = await supabase.from("services").insert({ id, ...payload });
-      if (error) { toast.error(error.message); setSaving(false); return; }
+    try {
+      if (service) {
+        await updateService(service.id, payload);
+      } else {
+        await insertService(slugify(name.trim()), payload);
+      }
+      toast.success(service ? "Service updated" : "Service added");
+      onSaved();
+    } catch (err: any) {
+      toast.error(err?.message ?? "Save failed");
     }
-    toast.success(service ? "Service updated" : "Service added");
     setSaving(false);
-    onSaved();
   }
 
   return (
@@ -531,14 +516,14 @@ function ProductsTab() {
 
   async function load() {
     setLoading(true);
-    const [pRes, bRes] = await Promise.all([
-      supabase.from("products").select("id,name,slug,category,brand_id,price,size,tagline,featured,trending,images").order("name"),
-      supabase.from("brands").select("*").order("name"),
+    const [pResult, bResult] = await Promise.allSettled([
+      fetchCatalogProducts(),
+      fetchCatalogBrands(),
     ]);
-    if (pRes.error) toast.error(pRes.error.message);
-    else setProducts(pRes.data ?? []);
-    if (bRes.error) toast.error(bRes.error.message);
-    else setBrands(bRes.data ?? []);
+    if (pResult.status === "rejected") toast.error(pResult.reason?.message ?? "Failed to load products");
+    else setProducts(pResult.value);
+    if (bResult.status === "rejected") toast.error(bResult.reason?.message ?? "Failed to load brands");
+    else setBrands(bResult.value);
     setLoading(false);
   }
 
@@ -554,17 +539,23 @@ function ProductsTab() {
   }
 
   async function handleDelete(p: CatalogProduct) {
-    const { error } = await supabase.from("products").delete().eq("id", p.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success(`"${p.name}" deleted`);
-    setDeleteTarget(null);
-    load();
+    try {
+      await deleteProduct(p.id);
+      toast.success(`"${p.name}" deleted`);
+      setDeleteTarget(null);
+      load();
+    } catch (err: any) {
+      toast.error(err?.message ?? "Delete failed");
+    }
   }
 
   async function toggleFlag(p: CatalogProduct, flag: "featured" | "trending") {
-    const { error } = await supabase.from("products").update({ [flag]: !p[flag] }).eq("id", p.id);
-    if (error) { toast.error(error.message); return; }
-    setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, [flag]: !p[flag] } : x));
+    try {
+      await toggleProductFlag(p.id, flag, !p[flag]);
+      setProducts((prev) => prev.map((x) => x.id === p.id ? { ...x, [flag]: !p[flag] } : x));
+    } catch (err: any) {
+      toast.error(err?.message ?? "Update failed");
+    }
   }
 
   return (
@@ -729,17 +720,18 @@ function ProductDialog({
       trending,
       images: imageUrl ? [imageUrl] : (product?.images ?? []),
     };
-    if (product) {
-      const { error } = await supabase.from("products").update(payload).eq("id", product.id);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    } else {
-      const id = slugify(name.trim());
-      const { error } = await supabase.from("products").insert({ id, ...payload });
-      if (error) { toast.error(error.message); setSaving(false); return; }
+    try {
+      if (product) {
+        await updateProduct(product.id, payload);
+      } else {
+        await insertProduct(slugify(name.trim()), payload);
+      }
+      toast.success(product ? "Product updated" : "Product added");
+      onSaved();
+    } catch (err: any) {
+      toast.error(err?.message ?? "Save failed");
     }
-    toast.success(product ? "Product updated" : "Product added");
     setSaving(false);
-    onSaved();
   }
 
   const filteredBrands = brands.filter((b) => b.category === category);
@@ -836,12 +828,11 @@ function DealersTab() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("dealers")
-      .select("id,name,slug,city,pincode,address,phone,whatsapp,hours_text,logo_initials,storefront_image,membership,rating,since")
-      .order("name");
-    if (error) toast.error(error.message);
-    else setDealers(data ?? []);
+    try {
+      setDealers(await fetchCatalogDealers());
+    } catch (err: any) {
+      toast.error(err?.message ?? "Failed to load dealers");
+    }
     setLoading(false);
   }
 
@@ -854,11 +845,14 @@ function DealersTab() {
   );
 
   async function handleDelete(dealer: CatalogDealer) {
-    const { error } = await supabase.from("dealers").delete().eq("id", dealer.id);
-    if (error) { toast.error(error.message); return; }
-    toast.success(`"${dealer.name}" deleted`);
-    setDeleteTarget(null);
-    load();
+    try {
+      await deleteDealer(dealer.id);
+      toast.success(`"${dealer.name}" deleted`);
+      setDeleteTarget(null);
+      load();
+    } catch (err: any) {
+      toast.error(err?.message ?? "Delete failed");
+    }
   }
 
   const membershipColor: Record<string, string> = {
@@ -1028,17 +1022,18 @@ function DealerDialog({
       membership,
       since: sinceYear,
     };
-    if (dealer) {
-      const { error } = await supabase.from("dealers").update(payload).eq("id", dealer.id);
-      if (error) { toast.error(error.message); setSaving(false); return; }
-    } else {
-      const id = slugify(name.trim());
-      const { error } = await supabase.from("dealers").insert({ id, ...payload });
-      if (error) { toast.error(error.message); setSaving(false); return; }
+    try {
+      if (dealer) {
+        await updateDealer(dealer.id, payload);
+      } else {
+        await insertDealer(slugify(name.trim()), payload);
+      }
+      toast.success(dealer ? "Dealer updated" : "Dealer added");
+      onSaved();
+    } catch (err: any) {
+      toast.error(err?.message ?? "Save failed");
     }
-    toast.success(dealer ? "Dealer updated" : "Dealer added");
     setSaving(false);
-    onSaved();
   }
 
   return (

@@ -58,7 +58,7 @@ function AccountLayout() {
   );
 }
 
-import { supabase } from "@/integrations/supabase/client";
+import { claimFirstAdmin } from "@/services/admin";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -77,13 +77,16 @@ export function RoleMismatch({ expected }: { expected: string }) {
 function ClaimFirstAdmin() {
   const { refreshRole } = useAuth();
   async function claim() {
-    const { data, error } = await supabase.rpc("claim_first_admin");
-    if (error) return toast.error(error.message);
-    if (data) {
-      toast.success("You are now an admin");
-      await refreshRole();
-    } else {
-      toast.message("An admin already exists — ask them to grant you access.");
+    try {
+      const isAdmin = await claimFirstAdmin();
+      if (isAdmin) {
+        toast.success("You are now an admin");
+        await refreshRole();
+      } else {
+        toast.message("An admin already exists — ask them to grant you access.");
+      }
+    } catch (err: any) {
+      toast.error(err?.message ?? "Something went wrong");
     }
   }
   return (

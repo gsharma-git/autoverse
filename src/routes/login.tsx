@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { z } from "zod";
 import { UserRound, Store, ShieldCheck, Mail, Lock, Phone, Car, MapPin } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { supabase } from "@/integrations/supabase/client";
+import { signUp, signInWithPassword } from "@/services/auth-actions";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -71,14 +71,7 @@ function LoginPage() {
     setLoading(true);
     try {
       if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: window.location.origin,
-            data: { name, role, phone, vehicle, pincode },
-          },
-        });
+        const { data, error } = await signUp({ email, password, name, role, phone, vehicle, pincode });
         if (error) throw error;
         toast.success(data.session ? "Account created" : "Check your email to confirm");
         if (data.session) {
@@ -86,7 +79,7 @@ function LoginPage() {
           redirectByRole(role);
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { error } = await signInWithPassword(email, password);
         if (error) throw error;
         await refreshRole();
         toast.success("Welcome back");

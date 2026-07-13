@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { uploadImage } from "@/services/storage";
 import { cn } from "@/lib/utils";
 import { ImageIcon, Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
@@ -36,14 +36,7 @@ export function ImageUpload({ value, onChange, folder, label = "Upload image", c
       const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
       const filename = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("vendor-images")
-        .upload(filename, file, { upsert: false, contentType: file.type });
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from("vendor-images").getPublicUrl(filename);
-      const url = data.publicUrl;
+      const url = await uploadImage("vendor-images", filename, file);
 
       setPreview(url);
       onChange(url);

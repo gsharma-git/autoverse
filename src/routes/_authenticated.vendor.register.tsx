@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { registerVendor } from "@/services/vendor-registration";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/_authenticated/vendor/register")({
@@ -37,19 +37,15 @@ function VendorRegister() {
     if (!session) return;
     setLoading(true);
     try {
-      // Upsert into vendors table.
-      // A DB trigger (notify_admins_of_new_vendor) handles admin notifications automatically.
-      const { error: vendorError } = await supabase.from("vendors").upsert({
-        id: session.userId,
-        business_name: businessName,
-        owner_name: ownerName,
+      await registerVendor({
+        userId: session.userId,
+        businessName,
+        ownerName,
         email,
         phone,
         city,
         pincode,
-        status: "pending",
       });
-      if (vendorError) throw vendorError;
 
       setStep(4);
       toast.success("Registration submitted", {
